@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
   <title>Acerca de – Better Discovery</title>
   <meta name="description" content="Conoce Better Discovery y cómo configurarlo con Supabase.">
   <link rel="stylesheet" href="css/style.css">
@@ -15,6 +17,8 @@
     <div class="nav-links">
       <a href="index.html">Explorar</a>
       <a href="about.html" class="active">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
       <a href="upload.html" class="btn btn-primary">+ Subir</a>
     </div>
     <div class="nav-auth" id="navAuth"></div>
@@ -32,40 +36,74 @@
     <!-- Features -->
     <h2>✨ Funciones</h2>
     <div class="feature-grid">
-      <div class="feature-card">
+      <div class="feature-card" data-reveal>
         <div class="ico">📤</div>
         <h3>Subir HTML</h3>
         <p>Pega hasta 1 MB de código HTML y publícalo al instante.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-reveal>
         <div class="ico">🖥️</div>
         <h3>Vista previa en vivo</h3>
         <p>Cada creación corre en un iframe con sandbox aislado.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-reveal>
         <div class="ico">❤️</div>
         <h3>Me gusta</h3>
         <p>Muestra apoyo a tus creaciones favoritas con un solo clic.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-reveal>
         <div class="ico">💬</div>
         <h3>Comentarios</h3>
         <p>Deja feedback, preguntas o apoyo a las personas creadoras.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-reveal>
         <div class="ico">👤</div>
         <h3>Perfil y creaciones</h3>
         <p>Edita tu perfil, sigue a otras personas y revisa tu espacio usado.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-reveal>
         <div class="ico">🔍</div>
         <h3>Búsqueda</h3>
         <p>Encuentra creaciones por título o descripción con búsqueda instantánea.</p>
       </div>
-      <div class="feature-card">
+      <div class="feature-card" data-reveal>
         <div class="ico">📱</div>
         <h3>Responsive</h3>
         <p>Funciona en escritorio, tablet y dispositivos móviles.</p>
+      </div>
+      <div class="feature-card dp-feature" data-reveal>
+        <div class="ico">⚡</div>
+        <h3>Discovery+</h3>
+        <p>Feed «Siguiendo», filtros por categoría, Guardadas y estadísticas ampliadas.</p>
+      </div>
+    </div>
+
+    <h2>⚡ Discovery+</h2>
+    <p>
+      Un nivel de descubrimiento mejorado para tu cuenta. Actívalo desde el
+      botón ⚡ de la barra de navegación, desde tu perfil, o desde la
+      <a href="discovery-plus.html">página de Discovery+</a> — y desbloquea:
+    </p>
+    <div class="feature-grid">
+      <div class="feature-card" data-reveal>
+        <div class="ico">📡</div>
+        <h3>Feed «Siguiendo»</h3>
+        <p>Pestaña en Explorar con solo creaciones de las personas que sigues.</p>
+      </div>
+      <div class="feature-card" data-reveal>
+        <div class="ico">🏷️</div>
+        <h3>Filtros por categoría</h3>
+        <p>Juegos, arte, herramientas, interactivos y más, en un toque.</p>
+      </div>
+      <div class="feature-card" data-reveal>
+        <div class="ico">⭐</div>
+        <h3>Guardadas</h3>
+        <p>Tus creaciones favoritas siempre a mano desde tu perfil.</p>
+      </div>
+      <div class="feature-card" data-reveal>
+        <div class="ico">📊</div>
+        <h3>Estadísticas</h3>
+        <p>Creaciones, me gusta y comentarios que has recibido.</p>
       </div>
     </div>
 
@@ -100,8 +138,14 @@
     <!-- Security note -->
     <h2>🔒 Seguridad</h2>
     <p>
-      Todo el HTML subido se ejecuta dentro de un <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--accent)">&lt;iframe&gt;</code> con sandbox
-      usando un atributo <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--accent)">sandbox</code> restringido.
+      La seguridad es por capas: todo el HTML subido se ejecuta dentro de un
+      <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--accent)">&lt;iframe&gt;</code> con
+      <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--accent)">sandbox</code> restringido y
+      <strong style="color:var(--text-primary)">sin</strong> <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--accent)">allow-same-origin</code>,
+      de modo que cada creación queda en un origen aislado que no puede tocar los datos del sitio.
+      A ello se suman cabeceras de seguridad (CSP, <code style="background:var(--bg-card);padding:2px 6px;border-radius:4px;color:var(--accent)">Permissions-Policy</code>
+      sin cámara/micrófono/geolocalización), el SDK de Supabase fijado con SRI y
+      el escapado de todo el texto que proviene de la base de datos.
     </p>
 
     <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);color:var(--text-muted);font-size:0.85rem;text-align:center">
@@ -118,7 +162,7 @@
   </div>
 
   <!-- Scripts (mínimos: esta página no hace consultas a la base de datos) -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script>
