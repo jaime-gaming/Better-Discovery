@@ -1,0 +1,6 @@
+# Sandbox local: datos de ejecución (se regeneran con /__reset)
+sandbox/data/
+
+# S.O. / editor
+.DS_Store
+Thumbs.db

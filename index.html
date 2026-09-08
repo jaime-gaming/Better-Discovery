@@ -3,8 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
   <title>Better Discovery</title>
   <meta name="description" content="Comparte y descubre creaciones HTML interactivas. Sube tu HTML y deja que otros lo vean, den like y comenten.">
+  <meta property="og:title" content="Better Discovery">
+  <meta property="og:description" content="Comparte y descubre creaciones HTML interactivas: súbelas, compártelas y dale like a las de la comunidad.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Better Discovery">
+  <meta name="twitter:card" content="summary">
+  <link rel="canonical" href="https://jaime-gaming.github.io/Better-Discovery/">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -15,6 +23,8 @@
     <div class="nav-links">
       <a href="index.html" class="active">Explorar</a>
       <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
       <a href="upload.html" class="btn btn-primary">+ Subir</a>
     </div>
     <div class="nav-auth" id="navAuth"></div>
@@ -27,26 +37,47 @@
     <a href="upload.html" class="btn btn-primary" style="font-size:1rem;padding:12px 30px;">Comparte tu HTML ✨</a>
   </section>
 
+  <!-- ── Banner Discovery+ (se oculta si ya eres miembro) ── -->
+  <div class="plus-banner" id="plusBanner">
+    <div class="plus-text">🚀 ¿Quieres <span class="plus-hot">5 MB</span> por creación, badge exclusivo y más ventajas? <span>Discovery+</span> es para creadores.</div>
+    <a class="btn btn-primary" href="discovery-plus.html">Descubrir Discovery+</a>
+  </div>
+
   <!-- ── Main content ── -->
   <div class="container">
 
     <!-- Search -->
     <div class="search-wrap">
       <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
-           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
       </svg>
-      <input id="searchInput" type="search" placeholder="Busca por título o descripción…" autocomplete="off">
+      <input id="searchInput" type="search" placeholder="Busca por título o descripción…"
+             autocomplete="off" aria-label="Buscar creaciones">
+    </div>
+
+    <!-- Discover bar: feed tabs + category chips (Discovery+) -->
+    <div class="discover-bar">
+      <div class="dp-tabs" role="tablist" aria-label="Feed">
+        <button type="button" class="dp-tab active" id="tabAll" role="tab" aria-selected="true">Todo</button>
+        <button type="button" class="dp-tab" id="tabFollowing" role="tab" aria-selected="false">
+          📡 Siguiendo <span class="dp-lock" id="followLock" title="Función de Discovery+">🔒</span>
+        </button>
+      </div>
+      <div class="dp-chips" id="tagChips" aria-label="Filtrar por categoría"></div>
     </div>
 
     <!-- Section header -->
     <div class="section-header">
-      <h2 class="section-title">✨ Últimas creaciones</h2>
+      <h2 class="section-title" id="sectionTitle">✨ Últimas creaciones</h2>
       <select id="sortSelect" class="sort-select" aria-label="Ordenar por">
         <option value="created_at">Más recientes</option>
         <option value="likes">Más valoradas</option>
+        <option value="title">Título (A–Z)</option>
       </select>
     </div>
+
+    <p id="resultCount" class="result-count" role="status" aria-live="polite" hidden></p>
 
     <!-- Grid -->
     <div id="grid" class="snippets-grid">
@@ -65,7 +96,7 @@
   </footer>
 
   <!-- ── Scripts ── -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script>
@@ -74,20 +105,23 @@
     let total = 0;
     let query = '';
     let sort  = 'created_at';
+    let feed  = 'all';          // 'all' | 'following'  (Discovery+)
+    let activeTag = null;       // filtro por categoría  (Discovery+)
 
     /* ── Render a card ── */
     function renderCard(s, idx) {
       const author = s.author || DEFAULT_AUTHOR_NAME;
+      const tag = s.tag ? `<span class="card-tag">${tagMeta(s.tag).emoji} ${escapeHtml(tagMeta(s.tag).label)}</span>` : '';
       return `
-        <a href="view.html?id=${encodeURIComponent(s.id)}" class="snippet-card reveal" style="--i:${idx % 8}">
-          <div class="card-thumb">🌐</div>
+        <a href="view.html?id=${encodeURIComponent(s.id)}" class="snippet-card reveal" data-id="${escapeHtml(s.id)}" style="--i:${idx % 8}">
+          <div class="card-thumb">🌐${tag}</div>
           <div class="card-body">
             <div class="card-title">${escapeHtml(s.title)}</div>
             <div class="card-desc">${escapeHtml(s.description || 'Sin descripción disponible.')}</div>
             <div class="card-footer">
               <span class="card-author">
                 <span class="profile-dot">${escapeHtml(getProfileInitial(author))}</span>
-                ${escapeHtml(author)}
+                ${escapeHtml(author)}${getDiscoveryPlusBadgeHtml(author)}
               </span>
               <div class="card-stats">
                 <span>❤️ ${s.likes ?? 0}</span>
@@ -98,42 +132,217 @@
         </a>`;
     }
 
+    /* ── Live preview on hover ──
+       Al pasar el ratón por una tarjeta, se carga (una sola vez) el
+       HTML de la creación en un iframe sandbox dentro de la miniatura. */
+    const previewCache = new Map(); // id -> iframe (LRU)
+    const PREVIEW_MAX = 4;
+
+    async function showCardPreview(card) {
+      const id = card.dataset?.id;
+      const noHover = window.matchMedia && window.matchMedia('(hover: none)').matches;
+      if (!id || !supabaseClient || noHover) return;
+      const thumb = card.querySelector('.card-thumb');
+      if (!thumb) return;
+
+      let frame = previewCache.get(id);
+      if (!frame) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('snippets')
+            .select('html_content')
+            .eq('id', id)
+            .single();
+          if (error || !data || !String(data.html_content || '').trim()) return;
+
+          frame = document.createElement('iframe');
+          frame.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals allow-popups');
+          frame.setAttribute('aria-hidden', 'true');
+          frame.tabIndex = -1;
+          frame.style.opacity = '0';
+          frame.srcdoc = data.html_content;
+          thumb.appendChild(frame);
+          previewCache.set(id, frame);
+          if (previewCache.size > PREVIEW_MAX) {
+            const oldest = previewCache.keys().next().value;
+            const old = previewCache.get(oldest);
+            if (old) old.remove();
+            previewCache.delete(oldest);
+          }
+        } catch {
+          return; // sin preview no pasa nada
+        }
+      }
+      previewCache.delete(id);
+      previewCache.set(id, frame);
+      requestAnimationFrame(() => { frame.style.opacity = '1'; });
+    }
+
+    function hideCardPreview(card) {
+      const frame = card.dataset?.id && previewCache.get(card.dataset.id);
+      if (frame) frame.style.opacity = '0';
+    }
+
+    /* ── Discover bar (tabs + category chips) — funciones de Discovery+ ── */
+    function renderTagChips() {
+      const wrap = document.getElementById('tagChips');
+      if (!wrap) return;
+      if (!isDiscoveryPlusActive()) {
+        wrap.innerHTML = `<button type="button" class="dp-chip locked" id="chipLocked">🔒 Filtros de categoría</button>`;
+        document.getElementById('chipLocked').addEventListener('click', openDiscoveryPlusModal);
+        return;
+      }
+      wrap.innerHTML = Object.entries(TAG_META).map(([key, meta]) =>
+        `<button type="button" class="dp-chip${activeTag === key ? ' active' : ''}" data-tag="${key}">${meta.emoji} ${meta.label}</button>`
+      ).join('') + `<button type="button" class="dp-chip clear${activeTag ? ' active' : ''}" data-tag="">✕ Quitar filtro</button>`;
+      wrap.querySelectorAll('.dp-chip[data-tag]').forEach(chip => {
+        chip.addEventListener('click', () => {
+          const t = chip.dataset.tag || null;
+          // Clic en la categoría activa (o en "Quitar filtro") lo desactiva.
+          activeTag = (!t || activeTag !== t) ? t : null;
+          page = 0;
+          renderTagChips();
+          loadSnippets();
+        });
+      });
+    }
+
+    function setFeed(next) {
+      if (next === 'following' && !isDiscoveryPlusActive()) {
+        openDiscoveryPlusModal();
+        return;
+      }
+      feed = next;
+      page = 0;
+      document.getElementById('tabAll').classList.toggle('active', feed === 'all');
+      document.getElementById('tabAll').setAttribute('aria-selected', String(feed === 'all'));
+      document.getElementById('tabFollowing').classList.toggle('active', feed === 'following');
+      document.getElementById('tabFollowing').setAttribute('aria-selected', String(feed === 'following'));
+      loadSnippets();
+    }
+
+    /* ── Skeleton (carga percibida más rápida) ── */
+    function renderGridSkeleton(count = 12) {
+      document.getElementById('grid').innerHTML = Array.from({ length: count }, () => `
+        <div class="skeleton-card" aria-hidden="true">
+          <div class="sk-thumb"></div>
+          <div class="sk-line w80"></div>
+          <div class="sk-line w60"></div>
+          <div class="sk-line w40"></div>
+        </div>`).join('');
+    }
+
+    /* ── Section title + result count ── */
+    function updateSectionHeader() {
+      const titleEl = document.getElementById('sectionTitle');
+      const countEl = document.getElementById('resultCount');
+      if (query) {
+        titleEl.textContent = '🔍 Resultados';
+        countEl.textContent = `${total} ${total === 1 ? 'resultado' : 'resultados'} para “${query.length > 40 ? query.slice(0, 40) + '…' : query}”`;
+        countEl.hidden = false;
+      } else if (feed === 'following') {
+        titleEl.textContent = '📡 Siguiendo';
+        countEl.hidden = true;
+      } else if (activeTag) {
+        const meta = tagMeta(activeTag);
+        titleEl.textContent = `${meta.emoji} ${meta.label}`;
+        countEl.hidden = true;
+      } else {
+        titleEl.textContent = '✨ Últimas creaciones';
+        countEl.hidden = true;
+      }
+    }
+
     /* ── Load snippets ── */
+    let loadSeq = 0;
+
     async function loadSnippets() {
+      const seq = ++loadSeq;
       const grid = document.getElementById('grid');
-      grid.innerHTML = '<div class="loading"><div class="spinner"></div>Cargando…</div>';
+      renderGridSkeleton();
 
       if (!supabaseClient) {
+        hideLoadBar();
         grid.innerHTML = configNoticeHtml();
+        document.getElementById('pagination').innerHTML = '';
+        document.getElementById('resultCount').hidden = true;
+        return;
+      }
+
+      // Feed «Siguiendo»: sin autores seguidos no hay que pedir nada.
+      const followed = feed === 'following' ? getFollowedAuthors() : null;
+      if (followed && followed.length === 0) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:3rem;margin-bottom:14px">📡</div>
+            <h3>Todavía no sigues a nadie</h3>
+            <p>Sigue a tus autores favoritos y su contenido aparecerá aquí.</p>
+            <a href="profile.html" class="btn btn-outline" style="margin-top:18px">Seguir autores</a>
+          </div>`;
         document.getElementById('pagination').innerHTML = '';
         return;
       }
 
       try {
+        showLoadBar();
+        const ascending = sort === 'title'; // A–Z; el resto, de mayor a menor
         let q = supabaseClient
           .from('snippets')
-          .select('id, title, description, author, created_at, likes', { count: 'exact' })
-          .order(sort, { ascending: false })
+          .select('id, title, description, author, created_at, likes, tag', { count: 'exact' })
+          .order(sort, { ascending, nullsFirst: false })
           .range(page * PER_PAGE, (page + 1) * PER_PAGE - 1);
 
         if (query) {
+          // El texto ya fue saneado en sanitizeSearchText(): sin
+          // paréntesis, comas ni comodines que rompan el filtro.
           q = q.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
         }
+        if (activeTag) q = q.eq('tag', activeTag);
+        if (followed) q = q.in('author', followed);
 
         const { data, error, count } = await q;
         if (error) throw error;
+        if (seq !== loadSeq) return; // response obsoleta (el usuario siguió buscando)
+        hideLoadBar();
 
         total = count ?? 0;
+        updateSectionHeader();
 
         if (!data || data.length === 0) {
+          // Estado vacío contextual: busca / categoría / galería vacía
+          let icon = '🎨', heading = 'Aún no hay creaciones',
+              body = '¡Comparte algo y abre la galería!',
+              action = `<a href="upload.html" class="btn btn-primary" style="margin-top:18px;display:inline-flex">+ Subir HTML</a>`;
+          if (query) {
+            icon = '🔍';
+            heading = 'No se encontraron resultados';
+            body = 'Prueba con otras palabras o revisa la ortografía.';
+            action = '<button type="button" class="btn btn-outline" id="clearFiltersBtn" style="margin-top:18px">Limpiar búsqueda</button>';
+          } else if (activeTag) {
+            const meta = tagMeta(activeTag);
+            icon = meta.emoji;
+            heading = `Nada en «${meta.label}» todavía`;
+            body = 'Prueba con otra categoría o quita el filtro.';
+            action = '<button type="button" class="btn btn-outline" id="clearFiltersBtn" style="margin-top:18px">Quitar filtro</button>';
+          }
           grid.innerHTML = `
             <div class="empty-state">
-              <div style="font-size:3rem;margin-bottom:14px">🎨</div>
-              <h3>${query ? 'No se encontraron resultados' : 'Aún no hay creaciones'}</h3>
-              <p>${query ? 'Prueba con otra búsqueda.' : '¡Comparte algo y abre la galería!'}</p>
-              <a href="upload.html" class="btn btn-primary" style="margin-top:18px;display:inline-flex">+ Subir HTML</a>
+              <div style="font-size:3rem;margin-bottom:14px">${icon}</div>
+              <h3>${heading}</h3>
+              <p>${body}</p>
+              ${action}
             </div>`;
           document.getElementById('pagination').innerHTML = '';
+          const clearBtn = document.getElementById('clearFiltersBtn');
+          if (clearBtn) clearBtn.addEventListener('click', () => {
+            if (query) clearSearch();
+            else if (activeTag) {
+              activeTag = null;
+              page = 0;
+              renderTagChips();
+              loadSnippets();
+            }
+          });
           return;
         }
 
@@ -141,13 +350,27 @@
         renderPagination();
 
       } catch (err) {
+        if (seq !== loadSeq) return;
+        hideLoadBar();
         grid.innerHTML = `
           <div class="empty-state">
             <div style="font-size:2.5rem;margin-bottom:12px">⚠️</div>
             <h3>Algo salió mal</h3>
-            <p style="max-width:360px;margin:0 auto">${escapeHtml(err.message)}</p>
+            <p style="max-width:360px;margin:0 auto">${escapeHtml(friendlyDbError(err))}</p>
+            <button type="button" class="btn btn-outline" id="retryBtn" style="margin-top:18px">Reintentar</button>
           </div>`;
+        document.getElementById('pagination').innerHTML = '';
+        document.getElementById('retryBtn').addEventListener('click', loadSnippets);
       }
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      input.value = '';
+      query = '';
+      page = 0;
+      loadSnippets();
+      input.focus();
     }
 
     /* ── Pagination ── */
@@ -180,11 +403,23 @@
     }
 
     /* ── Event listeners ── */
+    // Live preview por hover (delegación en la grid)
+    const gridEl = document.getElementById('grid');
+    gridEl.addEventListener('mouseover', e => {
+      const card = e.target.closest('.snippet-card');
+      if (card) showCardPreview(card);
+    });
+    gridEl.addEventListener('mouseout', e => {
+      const card = e.target.closest('.snippet-card');
+      if (card && !card.contains(e.relatedTarget)) hideCardPreview(card);
+    });
+
     let searchTimer;
     document.getElementById('searchInput').addEventListener('input', e => {
       clearTimeout(searchTimer);
       searchTimer = setTimeout(() => {
-        query = e.target.value.trim();
+        // Sanea el texto antes de meterlo en el filtro PostgREST.
+        query = sanitizeSearchText(e.target.value);
         page  = 0;
         loadSnippets();
       }, 380);
@@ -196,9 +431,33 @@
       loadSnippets();
     });
 
+    function updateFollowLock() {
+      const unlocked = isDiscoveryPlusActive();
+      document.getElementById('followLock').style.display = unlocked ? 'none' : '';
+      document.getElementById('tabFollowing').classList.toggle('locked', !unlocked);
+    }
+
+    document.addEventListener('dp:changed', () => {
+      updateFollowLock();
+      renderTagChips();
+    });
+
+    document.getElementById('tabAll').addEventListener('click', () => setFeed('all'));
+    document.getElementById('tabFollowing').addEventListener('click', () => setFeed('following'));
+
+    function updatePlusBanner() {
+      const banner = document.getElementById('plusBanner');
+      if (banner) banner.style.display = isDiscoveryPlusActive() ? 'none' : '';
+    }
+
+    document.addEventListener('dp:changed', updatePlusBanner);
+
     async function initPage() {
       await requireAuth({ redirect: false });
       await renderAuthNav();
+      updatePlusBanner();
+      updateFollowLock();
+      renderTagChips();
       loadSnippets();
     }
 

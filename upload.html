@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
   <title>Subir – Better Discovery</title>
   <meta name="description" content="Comparte tu creación HTML con el mundo. Sube hasta 1 MB de código HTML.">
   <link rel="stylesheet" href="css/style.css">
@@ -76,6 +78,8 @@
     <div class="nav-links">
       <a href="index.html">Explorar</a>
       <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
       <a href="upload.html" class="btn btn-primary active">+ Subir</a>
     </div>
     <div class="nav-auth" id="navAuth"></div>
@@ -85,7 +89,7 @@
   <div class="form-page" id="formPage">
     <div class="page-header">
       <h1 class="page-title">Sube tu creación HTML</h1>
-      <p class="page-sub">Pega tu código HTML (hasta 1 MB). Otras personas podrán verlo e interactuar con él.</p>
+      <p class="page-sub" id="limitPageSub">Pega tu código HTML (hasta 1 MB). Otras personas podrán verlo e interactuar con él.</p>
     </div>
 
     <div id="configWarning" class="config-notice" style="display:none;margin-bottom:24px">
@@ -141,14 +145,17 @@
       <div class="form-group">
         <div class="preview-toggle">
           <label class="form-label" for="htmlCode" style="margin:0;flex:1">
-            Código HTML <span class="hint">obligatorio · máximo 1 MB</span>
+            Código HTML <span class="hint" id="limitHint">obligatorio · máximo 1 MB</span>
           </label>
           <button type="button" id="togglePreview">👁 Vista previa</button>
         </div>
 
         <div style="margin-bottom:10px">
-          <label class="form-label" for="htmlFile">Cargar archivo .html</label>
-          <input id="htmlFile" class="form-input" type="file" accept=".html,.htm,text/html">
+          <label class="form-label" for="htmlFile">Cargar archivo .html <span class="hint">o arrástralo al editor</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input id="htmlFile" class="form-input" type="file" accept=".html,.htm,text/html" style="flex:1;min-width:200px">
+            <button type="button" id="loadSampleBtn" class="btn btn-outline">💡 Probar un ejemplo</button>
+          </div>
           <div class="size-bar" style="justify-content:flex-start;margin-top:6px">Se rechazan archivos ZIP o cualquier formato que no sea HTML.</div>
         </div>
 
@@ -198,12 +205,33 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
   <script src="js/config.js"></script>
   <script src="js/app.js"></script>
   <script>
-    const MAX_BYTES = 1 * 1024 * 1024; // 1 MB
+    // Discovery+ sube hasta 5 MB por creación; el resto, 1 MB.
+    let MAX_BYTES = getMaxUploadBytes();
+    const maxLimitText = () => (isDiscoveryPlusActive() ? '5 MB (Discovery+)' : '1 MB');
     let previewVisible = false;
+    let previewTimer = null;
+
+    function updateUploadLimits() {
+      MAX_BYTES = getMaxUploadBytes();
+      document.getElementById('limitPageSub').textContent =
+        `Pega tu código HTML (hasta ${maxLimitText()}). Otras personas podrán verlo e interactuar con él.`;
+      document.getElementById('limitHint').textContent =
+        `obligatorio · máximo ${maxLimitText()}`;
+      updateSizeIndicator();
+    }
+    document.addEventListener('dp:changed', updateUploadLimits);
+
+    /* La vista previa se actualiza con un pequeño retardo para no
+       re-renderizar el iframe en cada pulsación de tecla. */
+    function schedulePreviewRefresh() {
+      if (!previewVisible) return;
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(refreshPreview, 450);
+    }
 
     function getHtmlInputValue() {
       return document.getElementById('htmlCode').value;
@@ -243,21 +271,21 @@
       if (bytes > MAX_BYTES) {
         bar.style.background    = 'var(--danger)';
         label.className         = 'size-bar error';
-        label.textContent       = `${bytesToSize(bytes)} / 1 MB — ¡supera el límite!`;
+        label.textContent       = `${bytesToSize(bytes)} / ${maxLimitText()} — ¡supera el límite!`;
       } else if (pct > 80) {
         bar.style.background    = '#f59e0b';
         label.className         = 'size-bar warn';
-        label.textContent       = `${bytesToSize(bytes)} / 1 MB`;
+        label.textContent       = `${bytesToSize(bytes)} / ${maxLimitText()}`;
       } else {
         bar.style.background    = 'var(--accent)';
         label.className         = 'size-bar';
-        label.textContent       = `${bytesToSize(bytes)} / 1 MB`;
+        label.textContent       = `${bytesToSize(bytes)} / ${maxLimitText()}`;
       }
     }
 
     document.getElementById('htmlCode').addEventListener('input', () => {
       updateSizeIndicator();
-      if (previewVisible) refreshPreview();
+      schedulePreviewRefresh();
     });
 
     document.getElementById('htmlFile').addEventListener('change', async e => {
@@ -266,6 +294,12 @@
 
       if (!isAllowedHtmlFile(file)) {
         showToast('Solo se permiten archivos HTML. ZIP y otros formatos están rechazados.', 'error');
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > MAX_BYTES) {
+        showToast(`El archivo pesa ${bytesToSize(file.size)} y supera el límite de ${maxLimitText()}.`, 'error');
         e.target.value = '';
         return;
       }
@@ -280,23 +314,120 @@
 
       document.getElementById('htmlCode').value = text;
       updateSizeIndicator();
-      if (previewVisible) refreshPreview();
+      refreshPreviewNow();
       showToast('Archivo HTML cargado correctamente.', 'success');
     });
 
     /* ── Live preview toggle ── */
     const previewIframe = document.getElementById('livePreview');
 
-    function refreshPreview() {
+    function refreshPreviewNow() {
+      clearTimeout(previewTimer);
+      if (!previewVisible) return;
       const code = document.getElementById('htmlCode').value;
       previewIframe.srcdoc = code || '<p style="color:#888;font-family:sans-serif;padding:20px">Tu HTML aparecerá aquí…</p>';
     }
+
+    const refreshPreview = refreshPreviewNow;
 
     document.getElementById('togglePreview').addEventListener('click', () => {
       previewVisible = !previewVisible;
       previewIframe.style.display = previewVisible ? 'block' : 'none';
       document.getElementById('togglePreview').textContent = previewVisible ? '✏️ Editor' : '👁 Vista previa';
-      if (previewVisible) refreshPreview();
+      if (previewVisible) refreshPreviewNow();
+    });
+
+    /* ── Sample ── */
+    const SAMPLE_HTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Mi primer juego</title>
+  <style>
+    body { margin:0; background:#0f172a; color:#e2e8f0; font-family:sans-serif;
+           display:flex; flex-direction:column; align-items:center; justify-content:center;
+           height:100vh; gap:12px; }
+    canvas { border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+    button { padding:8px 18px; border-radius:8px; border:none; cursor:pointer;
+             background:#6366f1; color:white; font-size:14px; }
+    p { margin:0; opacity:.7; font-size:13px; }
+  </style>
+</head>
+<body>
+  <h2>⭐ Estrellitas</h2>
+  <p>Mueve el ratón · haz clic para explotar</p>
+  <canvas id="c" width="420" height="260"></canvas>
+  <button onclick="explode()">✨ Explotar</button>
+  <script>
+    const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+    let stars = Array.from({length: 60}, () => ({
+      x: Math.random()*cv.width, y: Math.random()*cv.height,
+      r: Math.random()*2+1, s: Math.random()*.5+.2,
+      hue: Math.random()*360
+    }));
+    function explode(cx, cy) {
+      for (let i = 0; i < 40; i++) stars.push({
+        x: cx ?? Math.random()*cv.width, y: cy ?? Math.random()*cv.height,
+        r: Math.random()*2+1, s: Math.random()*.5+.2,
+        hue: Math.random()*360, vx: (Math.random()-.5)*6, vy: (Math.random()-.5)*6, life: 60
+      });
+    }
+    cv.addEventListener('click', e => {
+      const rect = cv.getBoundingClientRect();
+      explode((e.clientX-rect.left)*cv.width/rect.width, (e.clientY-rect.top)*cv.height/rect.height);
+    });
+    (function tick() {
+      ctx.clearRect(0,0,cv.width,cv.height);
+      stars = stars.filter(st => st.life !== undefined ? (st.life-- > 0) : true);
+      for (const st of stars) {
+        ctx.fillStyle = 'hsl(' + st.hue + ',90%,65%)';
+        ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, 7); ctx.fill();
+        st.x += st.vx ?? 0; st.y += (st.vy ?? st.s);
+        if (st.x < 0) st.x = cv.width; if (st.x > cv.width) st.x = 0;
+        if (st.y > cv.height) st.y = 0;
+        if (st.vx !== undefined) st.hue = (st.hue + 4) % 360;
+      }
+      requestAnimationFrame(tick);
+    })();
+  <\/script>
+</body>
+</html>`;
+
+    document.getElementById('loadSampleBtn').addEventListener('click', () => {
+      document.getElementById('htmlCode').value = SAMPLE_HTML;
+      updateSizeIndicator();
+      refreshPreviewNow();
+      showToast('Ejemplo cargado en el editor.', 'success');
+    });
+
+    /* ── Drag & drop ── */
+    const codeArea = document.getElementById('htmlCode');
+    ['dragenter', 'dragover'].forEach(ev => codeArea.addEventListener(ev, e => {
+      e.preventDefault();
+      codeArea.classList.add('dragover');
+    }));
+    ['dragleave', 'drop'].forEach(ev => codeArea.addEventListener(ev, e => {
+      e.preventDefault();
+      codeArea.classList.remove('dragover');
+    }));
+    codeArea.addEventListener('drop', async e => {
+      const file = e.dataTransfer?.files?.[0];
+      if (!file) return;
+      if (!isAllowedHtmlFile(file)) {
+        showToast('Solo se permiten archivos HTML. ZIP y otros formatos están rechazados.', 'error');
+        return;
+      }
+      if (file.size > MAX_BYTES) {
+        showToast(`El archivo pesa ${bytesToSize(file.size)} y supera el límite de ${maxLimitText()}.`, 'error');
+        return;
+      }
+      const text = await file.text();
+      const validationError = validateHtmlDocument(text);
+      if (validationError) { showToast(validationError, 'error'); return; }
+      codeArea.value = text;
+      updateSizeIndicator();
+      refreshPreviewNow();
+      showToast('Archivo HTML cargado correctamente.', 'success');
     });
 
     /* ── Form submit ── */
@@ -321,7 +452,13 @@
       if (validationError) { showToast(validationError, 'error'); document.getElementById('htmlCode').focus(); return; }
 
       const bytes = new TextEncoder().encode(htmlCode).length;
-      if (bytes > MAX_BYTES) { showToast('El HTML supera el límite de 1 MB.', 'error'); return; }
+      if (bytes > MAX_BYTES) { showToast(`El HTML supera el límite de ${maxLimitText()}.`, 'error'); return; }
+
+      const gate = bdThrottleCheck('upload');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
 
       saveProfileData({ displayName: profileName, bio: getProfileData().bio });
 
@@ -340,15 +477,17 @@
           .single();
 
         if (error) throw error;
+        bdThrottleRecord('upload');
 
         /* Show success */
         recordOwnedSnippetId(data.id);
+        void logEvent('upload.created', { id: data.id, title });
         document.getElementById('formPage').style.display    = 'none';
         document.getElementById('successPage').style.display = 'block';
         document.getElementById('viewLink').href = `view.html?id=${encodeURIComponent(data.id)}`;
 
       } catch (err) {
-        showToast(`Error: ${err.message}`, 'error', 6000);
+        showToast(friendlyDbError(err), 'error', 6000);
         btn.disabled    = false;
         btn.textContent = '🚀 Publicar';
         status.textContent = '';
@@ -356,8 +495,10 @@
     });
 
     async function initPage() {
-      await requireAuth({ redirect: false });
+      // Subir requiere cuenta: las creaciones se firman con tu perfil.
+      await requireAuth({ redirect: true });
       await renderAuthNav();
+      updateUploadLimits();
       const profile = getProfileData();
       document.getElementById('quickProfileName').value = profile.displayName === DEFAULT_AUTHOR_NAME ? '' : profile.displayName;
       document.getElementById('author').placeholder = profile.displayName;

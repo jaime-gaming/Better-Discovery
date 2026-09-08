@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>Soporte – Better Discovery</title>
+  <meta name="description" content="Soporte de Better Discovery: abre un ticket y un moderador te responderá. Si no hay respuesta en 6 horas, el ticket se cierra automáticamente.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .support-page { max-width: 960px; margin: 0 auto; padding: 34px 24px 90px; }
+    .support-hero { margin-bottom: 22px; }
+    .support-hero h1 { font-size: clamp(1.7rem, 3vw, 2.4rem); margin-bottom: 8px; }
+    .support-hero p { color: var(--text-muted); line-height: 1.6; margin: 0; }
+    .support-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+    .support-note { color: var(--text-muted); font-size: .85rem; margin-top: 10px; }
+    @media (max-width: 720px) { .support-grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="index.html">Explorar</a>
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html" class="active">Soporte</a>
+    </div>
+    <div class="nav-auth" id="navAuth"></div>
+  </nav>
+
+  <main class="support-page">
+    <div class="support-hero" data-reveal>
+      <h1>Soporte</h1>
+      <p>Envía un ticket y un moderador te responderá. Si no hay respuesta en <strong>6 horas</strong>, el ticket se cierra automáticamente.</p>
+    </div>
+
+    <div class="support-grid">
+      <div class="ticket-card" data-reveal>
+        <div class="ticket-title">Nuevo ticket</div>
+        <div class="form-group" style="margin-top:12px">
+          <label class="form-label" for="supportSubject">Asunto</label>
+          <input id="supportSubject" class="form-input" type="text" maxlength="120" placeholder="Problema con…">
+        </div>
+        <div class="form-group" style="margin-top:12px">
+          <label class="form-label" for="supportMessage">Mensaje</label>
+          <textarea id="supportMessage" class="form-textarea" maxlength="1000" rows="4" placeholder="Describe tu problema…"></textarea>
+        </div>
+        <button type="button" class="btn btn-primary" id="createTicketBtn" style="width:100%;justify-content:center;margin-top:14px">Crear ticket</button>
+        <p class="support-note" id="createTicketNote">Necesitas sesión iniciada para crear tickets.</p>
+      </div>
+
+      <div class="ticket-card" data-reveal>
+        <div class="ticket-title">Mis tickets</div>
+        <div id="ticketList" style="margin-top:12px">
+          <div class="empty-state" style="padding:24px"><h3>Cargando…</h3></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ticket-card" id="ticketChatCard" style="display:none" data-reveal>
+      <div class="ticket-header">
+        <div>
+          <div class="ticket-title" id="chatTicketTitle">Ticket</div>
+          <div class="ticket-meta" id="chatTicketMeta"></div>
+        </div>
+        <span class="ticket-status open" id="chatTicketStatus">Abierto</span>
+      </div>
+      <div id="chatMessages" class="comments-list" style="margin-top:14px;max-height:360px;overflow-y:auto"></div>
+      <div style="margin-top:14px">
+        <textarea id="chatInput" class="form-textarea" maxlength="1000" rows="2" placeholder="Escribe una respuesta…"></textarea>
+        <button type="button" class="btn btn-primary" id="chatSendBtn" style="margin-top:8px">Enviar</button>
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <a href="terms.html">Términos y condiciones</a>
+    <span>·</span>
+    <a href="privacy.html">Política de privacidad</a>
+    <span>·</span>
+    <a href="discovery-plus.html">⚡ Discovery+</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let currentTicketId = null;
+
+    function ticketCardHtml(t) {
+      const open = t.status === 'open';
+      return `
+        <div class="ticket-card" data-id="${escapeHtml(t.id)}" style="cursor:pointer;margin-bottom:12px">
+          <div class="ticket-header">
+            <div class="ticket-title">${escapeHtml(t.subject)}</div>
+            <span class="ticket-status ${open ? 'open' : 'closed'}">${open ? 'Abierto' : 'Cerrado'}</span>
+          </div>
+          <div class="ticket-meta">${open ? 'En espera de respuesta' : `Cerrado por ${escapeHtml(t.closed_by || 'sistema')}`} · ${formatDate(t.created_at)}</div>
+        </div>`;
+    }
+
+    async function loadTickets() {
+      const container = document.getElementById('ticketList');
+      const session = await getSession();
+      const email = getSessionEmail(session);
+      if (!email) {
+        container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>Inicia sesión</h3><p>Entra con tu cuenta para ver y crear tickets.</p></div>';
+        return;
+      }
+      try {
+        const { data, error } = await supabaseClient.from('support_tickets')
+          .select('id, subject, status, created_at, closed_by')
+          .eq('user_email', email)
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        const items = Array.isArray(data) ? data : [];
+        // Auto-cierre: los tickets abiertos de hace +6 h se cierran solos.
+        let autoClosed = false;
+        for (const t of items) {
+          if (t.status === 'open' && Date.now() - new Date(t.created_at).getTime() >= TICKET_CLOSE_DELAY_MS) {
+            await closeSupportTicket(t.id, 'system');
+            autoClosed = true;
+          }
+        }
+        if (autoClosed) { showToast('Algunos tickets antiguos se han cerrado automáticamente.', 'info'); await loadTickets(); return; }
+        if (!items.length) {
+          container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>Sin tickets</h3><p>Aún no has creado ningún ticket.</p></div>';
+          return;
+        }
+        container.innerHTML = items.map(ticketCardHtml).join('');
+        container.querySelectorAll('.ticket-card').forEach(card => {
+          card.addEventListener('click', () => openTicket(card.getAttribute('data-id')));
+        });
+      } catch {
+        container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>No se pudieron cargar los tickets</h3></div>';
+      }
+    }
+
+    async function openTicket(id) {
+      currentTicketId = id;
+      const card = document.getElementById('ticketChatCard');
+      card.style.display = '';
+      try {
+        const { data, error } = await supabaseClient.from('support_tickets')
+          .select('id, subject, status, created_at, closed_by')
+          .eq('id', id).maybeSingle();
+        if (error || !data) { showToast('Ticket no encontrado', 'error'); return; }
+        document.getElementById('chatTicketTitle').textContent = data.subject;
+        document.getElementById('chatTicketMeta').textContent = 'Creado: ' + formatDate(data.created_at);
+        const statusEl = document.getElementById('chatTicketStatus');
+        statusEl.textContent = data.status === 'open' ? 'Abierto' : 'Cerrado';
+        statusEl.className = 'ticket-status ' + data.status;
+        document.getElementById('chatInput').disabled = data.status !== 'open';
+        document.getElementById('chatSendBtn').disabled = data.status !== 'open';
+        await loadMessages(id);
+      } catch {
+        showToast('No se pudo cargar el ticket', 'error');
+      }
+      card.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function loadMessages(ticketId) {
+      const container = document.getElementById('chatMessages');
+      try {
+        const { data, error } = await supabaseClient.from('support_messages')
+          .select('id, email, message, created_at')
+          .eq('ticket_id', ticketId)
+          .order('created_at', { ascending: true });
+        if (error) throw error;
+        const items = Array.isArray(data) ? data : [];
+        container.innerHTML = items.length ? items.map(msg => `
+          <div class="chat-bubble">
+            <div class="who">${escapeHtml(msg.email || 'Anónimo')}</div>
+            <div class="what">${escapeHtml(msg.message)}</div>
+            <div class="when">${formatDate(msg.created_at)}</div>
+          </div>`).join('')
+          : '<div class="empty-state" style="padding:18px"><h3>Sin mensajes aún</h3></div>';
+        container.scrollTop = container.scrollHeight;
+      } catch {
+        container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>No se pudieron cargar los mensajes</h3></div>';
+      }
+    }
+
+    async function sendChatMessage() {
+      if (!currentTicketId) return;
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const gate = bdThrottleCheck('comment');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+
+      const session = await getSession();
+      const btn = document.getElementById('chatSendBtn');
+      btn.disabled = true;
+      try {
+        const { error } = await supabaseClient.from('support_messages').insert([{
+          ticket_id: currentTicketId,
+          email: getSessionEmail(session),
+          message: text.slice(0, 1000),
+        }]);
+        if (error) throw error;
+        bdThrottleRecord('comment');
+        input.value = '';
+        await loadMessages(currentTicketId);
+      } catch (err) {
+        showToast('No se pudo enviar: ' + err.message, 'error', 4000);
+      } finally {
+        btn.disabled = false;
+        input.focus();
+      }
+    }
+
+    async function createTicket() {
+      const session = await getSession();
+      if (!session) { showToast('Inicia sesión para crear un ticket.', 'error'); return; }
+      const subject = document.getElementById('supportSubject').value.trim();
+      const message = document.getElementById('supportMessage').value.trim();
+      if (!subject) { showToast('Escribe un asunto.', 'error'); return; }
+      if (!message) { showToast('Escribe un mensaje.', 'error'); return; }
+
+      const gate = bdThrottleCheck('ticket');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+
+      const btn = document.getElementById('createTicketBtn');
+      btn.disabled = true;
+      btn.textContent = 'Enviando…';
+      try {
+        await createSupportTicket(subject, message, session);
+        bdThrottleRecord('ticket');
+        document.getElementById('supportSubject').value = '';
+        document.getElementById('supportMessage').value = '';
+        showToast('Ticket creado. Un moderador te responderá.', 'success');
+        await loadTickets();
+      } catch (err) {
+        showToast('No se pudo crear el ticket: ' + err.message, 'error', 5000);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Crear ticket';
+      }
+    }
+
+    async function initPage() {
+      await requireAuth({ redirect: false });
+      await renderAuthNav();
+      const session = await getSession();
+      const btn = document.getElementById('createTicketBtn');
+      if (!session) {
+        btn.disabled = true;
+      } else {
+        document.getElementById('createTicketNote').style.display = 'none';
+      }
+      await loadTickets();
+    }
+
+    document.getElementById('createTicketBtn').addEventListener('click', createTicket);
+    document.getElementById('chatSendBtn').addEventListener('click', sendChatMessage);
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

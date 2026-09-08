@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>Mod – Better Discovery</title>
+  <meta name="description" content="Panel de moderación de Better Discovery.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .mod-page { max-width: 1100px; margin: 0 auto; padding: 34px 24px 90px; }
+    .mod-page h1 { font-size: clamp(1.7rem, 3vw, 2.4rem); margin-bottom: 6px; }
+    .mod-page > p { color: var(--text-muted); margin-bottom: 22px; }
+    .mod-section { margin-bottom: 26px; }
+    .mod-section > h2 { font-size: 1.1rem; margin-bottom: 12px; }
+    .mod-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .mod-row .mod-main { flex: 1 1 260px; min-width: 0; }
+    .mod-row .mod-title { font-weight: 600; font-size: .95rem; }
+    .mod-row .mod-meta { color: var(--text-muted); font-size: .78rem; margin-top: 3px; }
+    .mod-row .mod-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mod-denied {
+      max-width: 560px;
+      margin: 60px auto;
+      text-align: center;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 40px 30px;
+    }
+    .mod-denied .ico { font-size: 3rem; margin-bottom: 14px; }
+    .mod-denied p { color: var(--text-muted); line-height: 1.7; }
+    .mod-count { color: var(--text-muted); font-size: .85rem; margin-bottom: 12px; }
+    .mod-subhead { font-size: 1rem; margin: 20px 0 6px; padding-top: 16px; border-top: 1px solid var(--border); }
+    .mod-redeem-row { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+    .mod-row code { font-size: .9rem; font-weight: 700; letter-spacing: .04em; color: #a5b4fc; }
+    .mod-redeem-row .form-input { flex: 1 1 260px; }
+    .mod-sub-status {
+      font-size: .72rem; font-weight: 700; padding: 2px 9px; border-radius: 999px;
+      margin-left: 8px; white-space: nowrap;
+    }
+    .mod-sub-status[data-status="pending"] { background: rgba(245, 158, 11, .15); color: #fbbf24; }
+    .mod-sub-status[data-status="active"] { background: rgba(99, 102, 241, .18); color: #a5b4fc; }
+    .mod-sub-status[data-status="cancelled"] { background: rgba(239, 68, 68, .15); color: #f87171; }
+    /* Modal de edición (autocontenido) */
+    .edit-overlay {
+      position: fixed; inset: 0; z-index: 90;
+      background: rgba(0, 0, 0, 0.66);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .edit-modal {
+      width: 100%; max-width: 640px; max-height: 88vh;
+      overflow-y: auto;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+    }
+    .edit-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 20px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: var(--bg-secondary); z-index: 1;
+    }
+    .edit-close {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 1.5rem; line-height: 1; cursor: pointer; padding: 4px 8px;
+    }
+    .edit-close:hover { color: var(--text-primary); }
+    .edit-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+    .edit-footer {
+      display: flex; justify-content: flex-end; gap: 10px;
+      padding: 14px 20px; border-top: 1px solid var(--border);
+      position: sticky; bottom: 0; background: var(--bg-secondary);
+    }
+    #editModal #editHtml { min-height: 180px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .78rem; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="index.html">Explorar</a>
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
+    </div>
+    <div class="nav-auth" id="navAuth"></div>
+  </nav>
+
+  <main class="mod-page">
+    <!-- Acceso restringido: se muestra solo si no eres moderador -->
+    <div class="mod-denied" id="modDenied" style="display:none">
+      <div class="ico">🛡️</div>
+      <h1>Acceso restringido</h1>
+      <p>Este panel es exclusivo para moderadores del proyecto.<br>Si crees que debería serlo, abre un ticket desde la página de <a href="support.html">soporte</a>.</p>
+    </div>
+
+    <!-- Panel: se muestra solo para moderadores -->
+    <div id="modPanel" style="display:none">
+      <h1>Panel de moderación 🛡️</h1>
+      <p>Revisa y gestiona las creaciones de la galería y los tickets de soporte.</p>
+
+      <section class="mod-section">
+        <h2>Creaciones</h2>
+        <div class="mod-count" id="snippetsCount">Cargando…</div>
+        <div id="snippetsList"></div>
+      </section>
+
+      <section class="mod-section">
+        <h2>⚡ Suscripciones Discovery+</h2>
+        <p class="mod-count" id="subsIntro">Solicitudes de los usuarios (3,99 €/mes): canjea el código para activarlas durante 30 días.</p>
+        <div class="mod-redeem-row">
+          <input id="redeemInput" class="form-input" type="text" placeholder="Código de la solicitud (p. ej. BDP-XXXX-XXXX)" maxlength="32" autocomplete="off">
+          <button type="button" class="btn btn-primary" id="redeemBtn">Canjear solicitud</button>
+        </div>
+        <div class="mod-count" id="subsCount">Cargando…</div>
+        <div id="subsList"></div>
+
+        <h3 class="mod-subhead">Códigos de activación</h3>
+        <p class="mod-count">
+          Crea códigos que se guardan en la base de datos: un usuario los canjea desde la
+          página de Discovery+ (o los aplicas tú a un email). Al canjear activan 30 días;
+          si el usuario ya tiene Discovery+ activo le suman 30 días más.
+        </p>
+        <div class="mod-redeem-row">
+          <input id="codeNote" class="form-input" type="text" placeholder="Nota (opcional): p. ej. «promo agosto»" maxlength="120">
+          <button type="button" class="btn btn-primary" id="addCodeBtn">➕ Añadir código</button>
+        </div>
+        <div class="mod-redeem-row">
+          <input id="applyCodeInput" class="form-input" type="text" placeholder="Código (BDP-XXXX-XXXX)" maxlength="32" autocomplete="off">
+          <input id="applyEmailInput" class="form-input" type="email" placeholder="Email del usuario" maxlength="120">
+          <button type="button" class="btn btn-outline" id="applyCodeBtn">Aplicar a un usuario</button>
+        </div>
+        <div class="mod-count" id="codesCount">Cargando…</div>
+        <div id="codesList"></div>
+      </section>
+
+      <section class="mod-section">
+        <h2>Tickets de soporte</h2>
+        <div class="mod-count" id="ticketsCount">Cargando…</div>
+        <div id="ticketsList"></div>
+      </section>
+
+      <div class="ticket-card" id="ticketChatCard" style="display:none">
+        <div class="ticket-header">
+          <div>
+            <div class="ticket-title" id="chatTicketTitle">Ticket</div>
+            <div class="ticket-meta" id="chatTicketMeta"></div>
+          </div>
+          <span class="ticket-status open" id="chatTicketStatus">Abierto</span>
+        </div>
+        <div id="chatMessages" class="comments-list" style="margin-top:14px;max-height:360px;overflow-y:auto"></div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <textarea id="chatInput" class="form-textarea" maxlength="1000" rows="2" placeholder="Escribe una respuesta… (se envía como moderador)" style="flex:1 1 320px"></textarea>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button type="button" class="btn btn-primary" id="chatSendBtn">Responder</button>
+            <button type="button" class="btn btn-outline" id="closeTicketBtn">Cerrar ticket</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal de edición de creación -->
+  <div class="edit-overlay" id="editModal" style="display:none">
+    <div class="edit-modal">
+      <div class="edit-header">
+        <h3 style="margin:0">Editar creación</h3>
+        <button type="button" class="edit-close" id="editCloseBtn" aria-label="Cerrar">×</button>
+      </div>
+      <div class="edit-body">
+        <div class="form-group">
+          <label class="form-label" for="editTitle">Título</label>
+          <input id="editTitle" class="form-input" type="text" maxlength="120">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editDescription">Descripción</label>
+          <textarea id="editDescription" class="form-textarea" maxlength="500" rows="2"></textarea>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label" for="editAuthor">Autor</label>
+            <input id="editAuthor" class="form-input" type="text" maxlength="60">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="editTag">Categoría</label>
+            <select id="editTag" class="form-input">
+              <option value="">— ninguna —</option>
+              <option value="game">🎮 Juego</option>
+              <option value="art">🎨 Arte</option>
+              <option value="tool">🛠️ Herramienta</option>
+              <option value="demo">📐 Demo</option>
+              <option value="interactive">🖱️ Interactivo</option>
+              <option value="other">📦 Otro</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="editHtml">Código HTML</label>
+          <textarea id="editHtml" class="form-textarea" rows="8"></textarea>
+        </div>
+      </div>
+      <div class="edit-footer">
+        <button type="button" class="btn btn-outline" id="editCancelBtn">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="editSaveBtn">Guardar cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <a href="privacy.html">Política de privacidad</a>
+    <span>·</span>
+    <a href="terms.html">Términos y condiciones</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let currentTicketId = null;
+
+    /* Recarga la lista de creaciones tras editar/borrar (llamado por app.js). */
+    window.__modReload = async () => {
+      await loadSnippets();
+      await loadTickets();
+      await loadSubscriptions();
+      await loadDpCodes();
+    };
+
+    const SUB_STATUS_LABEL = {
+      pending: '⏳ Pendiente',
+      active: '⚡ Activa',
+      cancelled: '⛔ Cancelada',
+    };
+
+    async function loadSubscriptions() {
+      const container = document.getElementById('subsList');
+      try {
+        const { data, error } = await supabaseClient.from('subscriptions')
+          .select('id, user_email, plan, price_cents, status, redeem_code, activated_at, activated_by, expires_at, created_at')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        const items = Array.isArray(data) ? data : [];
+        const pending = items.filter(s => s.status === 'pending').length;
+        const active = items.filter(s => s.status === 'active').length;
+        document.getElementById('subsCount').textContent =
+          items.length ? `${items.length} suscripciones (${pending} pendientes · ${active} activas)` : 'Sin suscripciones todavía';
+        if (!items.length) {
+          container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>Sin suscripciones</h3><p>Las solicitudes de Discovery+ que generen los usuarios aparecerán aquí para que las canjees.</p></div>';
+          return;
+        }
+        container.innerHTML = items.map(s => {
+          const price = (Number(s.price_cents) / 100).toLocaleString('es-ES', { minimumFractionDigits: 2 }) + ' €/mes';
+          const exp = s.expires_at ? ` · vigente hasta ${formatDate(s.expires_at)}` : '';
+          const act = s.activated_at ? ` · canjeada el ${formatDate(s.activated_at)} por ${escapeHtml(s.activated_by || 'moderador')}` : '';
+          const action = s.status === 'pending'
+            ? `<button type="button" class="btn btn-primary" data-redeem="${escapeHtml(s.redeem_code || '')}">Canjear ⚡</button>`
+            : (s.status === 'active' ? '' : `<button type="button" class="btn btn-outline" data-redeem="${escapeHtml(s.redeem_code || '')}">Canjear de nuevo</button>`);
+          return `
+          <div class="mod-row" data-subid="${escapeHtml(s.id)}">
+            <div class="mod-main">
+              <div class="mod-title">${escapeHtml(s.user_email)} <span class="mod-sub-status" data-status="${escapeHtml(s.status)}">${SUB_STATUS_LABEL[s.status] || escapeHtml(s.status)}</span></div>
+              <div class="mod-meta">Código: <code>${escapeHtml(s.redeem_code || '—')}</code> · ${price}${act}${exp}</div>
+            </div>
+            <div class="mod-actions">${action}</div>
+          </div>`;
+        }).join('');
+        container.querySelectorAll('[data-redeem]').forEach(btn => {
+          btn.addEventListener('click', () => redeemByCode(btn.getAttribute('data-redeem')));
+        });
+      } catch {
+        container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>No se pudieron cargar las suscripciones</h3></div>';
+      }
+    }
+
+    async function redeemByCode(code) {
+      const btn = document.getElementById('redeemBtn');
+      const gate = bdThrottleCheck('modcanje');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+      if (btn) btn.disabled = true;
+      try {
+        const session = await getSession();
+        const sub = await redeemSubscription(code, getSessionEmail(session));
+        bdThrottleRecord('modcanje');
+        showToast(`⚡ Suscripción de ${sub.user_email} activada 30 días.`, 'success', 5000);
+        const input = document.getElementById('redeemInput');
+        if (input) input.value = '';
+        await loadSubscriptions();
+      } catch (err) {
+        showToast(err.message || 'No se pudo canjear.', 'error', 5000);
+      } finally {
+        if (btn) btn.disabled = false;
+      }
+    }
+
+    /* ── Códigos de activación (creados por el moderador, en la BD) ── */
+    async function loadDpCodes() {
+      const container = document.getElementById('codesList');
+      try {
+        const { data, error } = await supabaseClient.from('dp_codes')
+          .select('id, code, status, note, created_by, created_at, used_by, used_at')
+          .order('created_at', { ascending: false })
+          .limit(50);
+        if (error) throw error;
+        const items = Array.isArray(data) ? data : [];
+        const available = items.filter(c => c.status === 'available').length;
+        document.getElementById('codesCount').textContent =
+          items.length ? `${items.length} códigos (${available} disponibles)` : 'Sin códigos todavía';
+        if (!items.length) {
+          container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>Sin códigos</h3><p>Añade un código y compártelo: el usuario lo canjea en la página de Discovery+ o lo aplicas a un email.</p></div>';
+          return;
+        }
+        container.innerHTML = items.map(c => `
+          <div class="mod-row">
+            <div class="mod-main">
+              <div class="mod-title"><code>${escapeHtml(c.code)}</code>
+                <span class="mod-sub-status" data-status="${c.status === 'available' ? 'active' : 'cancelled'}">${c.status === 'available' ? 'Disponible' : 'Usado'}</span>
+              </div>
+              <div class="mod-meta">
+                Creado por ${escapeHtml(c.created_by)} · ${formatDate(c.created_at)}
+                ${c.note ? ` · ${escapeHtml(c.note)}` : ''}
+                ${c.used_by ? ` · canjeado por ${escapeHtml(c.used_by)} el ${formatDate(c.used_at)}` : ''}
+              </div>
+            </div>
+          </div>`).join('');
+      } catch {
+        container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>No se pudieron cargar los códigos</h3></div>';
+      }
+    }
+
+    async function addDpCode() {
+      const btn = document.getElementById('addCodeBtn');
+      const note = document.getElementById('codeNote').value;
+
+      const gate = bdThrottleCheck('modcanje');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const session = await getSession();
+        const created = await createDpCode(note, getSessionEmail(session));
+        bdThrottleRecord('modcanje');
+        showToast(`Código ${created.code} creado.`, 'success', 5000);
+        document.getElementById('codeNote').value = '';
+        await loadDpCodes();
+      } catch (err) {
+        showToast(err.message || 'No se pudo crear el código.', 'error', 5000);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function applyCodeToUser() {
+      const btn = document.getElementById('applyCodeBtn');
+      const code = document.getElementById('applyCodeInput').value;
+      const email = document.getElementById('applyEmailInput').value;
+
+      const gate = bdThrottleCheck('modcanje');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+
+      btn.disabled = true;
+      try {
+        const session = await getSession();
+        const { sub, extended } = await redeemDpCode(code, email, getSessionEmail(session));
+        bdThrottleRecord('modcanje');
+        showToast(extended
+          ? `Código aplicado: ${sub.user_email} tiene +30 días de Discovery+.`
+          : `Código aplicado: Discovery+ activo 30 días para ${sub.user_email}.`, 'success', 6000);
+        document.getElementById('applyCodeInput').value = '';
+        document.getElementById('applyEmailInput').value = '';
+        await Promise.all([loadDpCodes(), loadSubscriptions()]);
+      } catch (err) {
+        showToast(err.message || 'No se pudo aplicar el código.', 'error', 5000);
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function loadSnippets() {
+      const container = document.getElementById('snippetsList');
+      try {
+        const { data, error } = await supabaseClient.from('snippets')
+          .select('id, title, description, author, tag, likes, html_content, created_at')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        const items = Array.isArray(data) ? data : [];
+        document.getElementById('snippetsCount').textContent =
+          `${items.length} creaciones en la galería`;
+        if (!items.length) {
+          container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>Sin creaciones</h3></div>';
+          return;
+        }
+        container.innerHTML = items.map(s => `
+          <div class="mod-row" data-id="${escapeHtml(s.id)}">
+            <div class="mod-main">
+              <div class="mod-title">${escapeHtml(s.title)}</div>
+              <div class="mod-meta">
+                ${escapeHtml(s.author || DEFAULT_AUTHOR_NAME)} · ${escapeHtml(s.tag || 'sin categoría')} ·
+                ❤️ ${s.likes ?? 0} · ${bytesToSize(snippetBytes(s))} · ${formatDate(s.created_at)}
+              </div>
+            </div>
+            <div class="mod-actions">
+              <a class="btn btn-outline" href="view.html?id=${encodeURIComponent(s.id)}" target="_blank" rel="noopener">Ver</a>
+              <button type="button" class="btn btn-outline" data-edit="${escapeHtml(s.id)}">Editar</button>
+              <button type="button" class="btn btn-outline" data-del="${escapeHtml(s.id)}" style="color:var(--danger)">Eliminar</button>
+            </div>
+          </div>`).join('');
+        container.querySelectorAll('[data-edit]').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const s = items.find(x => x.id === btn.getAttribute('data-edit'));
+            if (s) openEditModal(s);
+          });
+        });
+        container.querySelectorAll('[data-del]').forEach(btn => {
+          btn.addEventListener('click', () => modDeleteSnippet(btn.getAttribute('data-del')));
+        });
+      } catch {
+        container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>No se pudieron cargar las creaciones</h3></div>';
+      }
+    }
+
+    async function loadTickets() {
+      const container = document.getElementById('ticketsList');
+      try {
+        const { data, error } = await supabaseClient.from('support_tickets')
+          .select('id, user_email, subject, status, created_at, closed_by')
+          .order('created_at', { ascending: false });
+        if (error) throw error;
+        const items = Array.isArray(data) ? data : [];
+        const open = items.filter(t => t.status === 'open').length;
+        document.getElementById('ticketsCount').textContent =
+          items.length ? `${items.length} tickets (${open} abiertos)` : 'Sin tickets';
+        if (!items.length) {
+          container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>Sin tickets</h3></div>';
+          return;
+        }
+        container.innerHTML = items.map(t => `
+          <div class="mod-row">
+            <div class="mod-main">
+              <div class="mod-title">${escapeHtml(t.subject)}</div>
+              <div class="mod-meta">${escapeHtml(t.user_email)} · ${formatDate(t.created_at)}${t.closed_by ? ` · cerrado por ${escapeHtml(t.closed_by)}` : ''}</div>
+            </div>
+            <div class="mod-actions">
+              <button type="button" class="btn btn-outline" data-open="${escapeHtml(t.id)}">Abrir chat</button>
+              ${t.status === 'open' ? `<button type="button" class="btn btn-outline" data-close="${escapeHtml(t.id)}" style="color:var(--danger)">Cerrar</button>` : ''}
+            </div>
+          </div>`).join('');
+        container.querySelectorAll('[data-open]').forEach(btn => {
+          btn.addEventListener('click', () => openTicketChat(btn.getAttribute('data-open')));
+        });
+        container.querySelectorAll('[data-close]').forEach(btn => {
+          btn.addEventListener('click', () => closeTicketFromList(btn.getAttribute('data-close')));
+        });
+      } catch {
+        container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>No se pudieron cargar los tickets</h3></div>';
+      }
+    }
+
+    async function openTicketChat(id) {
+      currentTicketId = id;
+      const card = document.getElementById('ticketChatCard');
+      card.style.display = '';
+      try {
+        const { data, error } = await supabaseClient.from('support_tickets')
+          .select('id, subject, status, created_at, user_email, closed_by')
+          .eq('id', id).maybeSingle();
+        if (error || !data) { showToast('Ticket no encontrado', 'error'); return; }
+        document.getElementById('chatTicketTitle').textContent = data.subject;
+        document.getElementById('chatTicketMeta').textContent =
+          `De: ${data.user_email} · Creado: ${formatDate(data.created_at)}`;
+        const statusEl = document.getElementById('chatTicketStatus');
+        statusEl.textContent = data.status === 'open' ? 'Abierto' : 'Cerrado';
+        statusEl.className = 'ticket-status ' + data.status;
+        document.getElementById('chatInput').disabled = data.status !== 'open';
+        document.getElementById('chatSendBtn').disabled = data.status !== 'open';
+        document.getElementById('closeTicketBtn').style.display = data.status === 'open' ? '' : 'none';
+        await loadMessages(id);
+      } catch {
+        showToast('No se pudo cargar el ticket', 'error');
+      }
+      card.scrollIntoView?.({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    async function loadMessages(ticketId) {
+      const container = document.getElementById('chatMessages');
+      try {
+        const { data, error } = await supabaseClient.from('support_messages')
+          .select('id, email, message, created_at')
+          .eq('ticket_id', ticketId)
+          .order('created_at', { ascending: true });
+        if (error) throw error;
+        const items = Array.isArray(data) ? data : [];
+        container.innerHTML = items.length ? items.map(msg => `
+          <div class="chat-bubble">
+            <div class="who">${escapeHtml(msg.email || 'Anónimo')}</div>
+            <div class="what">${escapeHtml(msg.message)}</div>
+            <div class="when">${formatDate(msg.created_at)}</div>
+          </div>`).join('')
+          : '<div class="empty-state" style="padding:18px"><h3>Sin mensajes aún</h3></div>';
+        container.scrollTop = container.scrollHeight;
+      } catch {
+        container.innerHTML = '<div class="empty-state" style="padding:24px"><h3>No se pudieron cargar los mensajes</h3></div>';
+      }
+    }
+
+    async function sendReply() {
+      if (!currentTicketId) return;
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      const session = await getSession();
+      const btn = document.getElementById('chatSendBtn');
+      btn.disabled = true;
+      try {
+        const { error } = await supabaseClient.from('support_messages').insert([{
+          ticket_id: currentTicketId,
+          email: getSessionEmail(session),
+          message: text.slice(0, 1000),
+        }]);
+        if (error) throw error;
+        input.value = '';
+        await loadMessages(currentTicketId);
+      } catch (err) {
+        showToast('No se pudo enviar: ' + err.message, 'error', 4000);
+      } finally {
+        btn.disabled = false;
+        input.focus();
+      }
+    }
+
+    async function closeTicketFromList(id) {
+      if (!confirm('¿Cerrar este ticket?')) return;
+      try {
+        const session = await getSession();
+        await closeSupportTicket(id, getSessionEmail(session) || 'moderador');
+        showToast('Ticket cerrado.', 'success');
+        await loadTickets();
+        if (currentTicketId === id) document.getElementById('ticketChatCard').style.display = 'none';
+      } catch (err) {
+        showToast('No se pudo cerrar el ticket.', 'error', 5000);
+      }
+    }
+
+    async function initPage() {
+      await renderAuthNav();
+      const session = await getSession();
+      if (!isModerator(session)) {
+        document.getElementById('modDenied').style.display = '';
+        document.getElementById('modPanel').style.display = 'none';
+        return;
+      }
+      document.getElementById('modDenied').style.display = 'none';
+      document.getElementById('modPanel').style.display = '';
+      await Promise.all([loadSnippets(), loadTickets(), loadSubscriptions(), loadDpCodes()]);
+    }
+
+    document.getElementById('editCloseBtn').addEventListener('click', closeEditModal);
+    document.getElementById('editCancelBtn').addEventListener('click', closeEditModal);
+    document.getElementById('editSaveBtn').addEventListener('click', saveSnippetEdits);
+    document.getElementById('chatSendBtn').addEventListener('click', sendReply);
+    document.getElementById('redeemBtn').addEventListener('click', () => {
+      const input = document.getElementById('redeemInput');
+      redeemByCode(input ? input.value : '');
+    });
+    document.getElementById('redeemInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') redeemByCode(e.target.value);
+    });
+    document.getElementById('addCodeBtn').addEventListener('click', addDpCode);
+    document.getElementById('applyCodeBtn').addEventListener('click', applyCodeToUser);
+    document.getElementById('applyCodeInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') applyCodeToUser();
+    });
+    document.getElementById('closeTicketBtn').addEventListener('click', () => {
+      if (currentTicketId) closeTicketFromList(currentTicketId);
+    });
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>
