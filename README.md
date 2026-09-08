@@ -273,8 +273,11 @@ modificar todos los registros.
 **Todo el DDL + políticas RLS + triggers va en [`supabase/schema.sql`](supabase/schema.sql):**
 cubre las 7 tablas (`snippets`, `comments`, `support_tickets`,
 `support_messages`, `subscriptions`, `dp_codes`, `audit_log`), es idempotente
-(`if not exists` / `add column if not exists` / `drop policy if exists`) y
-basta con pegarlo una vez en el *SQL Editor* de Supabase.
+(`if not exists` / `add column if not exists` / `drop policy if exists`),
+compatible con las tablas del sitio anterior (si ya existían, se les
+añaden las columnas que faltan sin tocar los datos) y basta con
+pegarlo una vez en el *SQL Editor* de Supabase. Si te equivocas a
+mitad, corrige y vuelve a ejecutarlo: retoma donde quedó.
 
 ### Capas de protección (todas en el servidor)
 

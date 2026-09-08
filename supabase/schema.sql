@@ -7,7 +7,24 @@
 -- Es idempotente: puedes ejecutarlo varias veces sin efectos
 -- secundarios (crea las tablas que falten, añade las columnas y
 -- constraints que falten, y redefine funciones, triggers y
--- políticas RLS).
+-- políticas RLS). Si te equivocas a mitad, corrige y vuelve a
+-- ejecutarlo: retoma donde quedó.
+--
+-- Compatible con tablas del sitio anterior: si una tabla ya
+-- existía con un esquema distinto, se le añaden las columnas que
+-- falten (p. ej. support_messages.ticket_id, support_tickets.
+-- closed_at/closed_by) sin tocar los datos existentes.
+--
+-- Después de ejecutarlo puedes verificar con estas consultas
+-- (copiar y pegar en el mismo SQL Editor):
+--   select relname, relrowsecurity from pg_class
+--   where relname in ('snippets','comments','support_tickets',
+--     'support_messages','subscriptions','dp_codes','audit_log',
+--     'moderators') order by relname;            -- 8 filas, todas true
+--   select count(*) from pg_proc where proname = 'redeem_dp_code';
+--                                                -- 1
+--   select count(*) from pg_trigger where tgname like 'bd_guard_%';
+--                                                -- 5
 --
 -- Tablas:
 --   snippets, comments            → galería
@@ -69,11 +86,22 @@ alter table snippets add column if not exists likes integer not null default 0;
 alter table snippets add column if not exists tag text;
 
 create index if not exists snippets_created_at_idx on snippets (created_at desc);
+-- Si comments ya existía, completamos columnas que pudiera faltarle:
+alter table comments add column if not exists snippet_id uuid references snippets(id) on delete cascade;
+alter table comments add column if not exists author text not null default 'Anónimo';
+alter table comments add column if not exists content text not null default '';
+alter table comments add column if not exists created_at timestamptz not null default now();
 create index if not exists comments_snippet_id_idx on comments (snippet_id);
 
 -- Identidad del autor real (para RLS de edición/eliminación propia).
 -- Las filas nuevas la rellenan solas (auth.uid()); las filas antiguas
 -- quedan NULL y solo las gestiona un moderador.
+-- Si snippets ya existía (sitio anterior), completamos columnas que
+-- pudiera faltarle (con valores por defecto; lo existente no se toca):
+alter table snippets add column if not exists description text not null default '';
+alter table snippets add column if not exists author text not null default 'Anónimo';
+alter table snippets add column if not exists html_content text not null default '';
+alter table snippets add column if not exists created_at timestamptz not null default now();
 alter table snippets add column if not exists created_by uuid;
 alter table snippets alter column created_by set default auth.uid();
 create index if not exists snippets_created_by_idx on snippets (created_by);
@@ -97,6 +125,21 @@ create table if not exists support_messages (
   message text not null,
   created_at timestamptz not null default now()
 );
+
+-- Si support_tickets / support_messages ya existían del sitio anterior,
+-- completamos las columnas que faltan (el error "column ticket_id does
+-- not exist" sale de aquí). Las filas antiguas sin ticket_id quedan
+-- huérfanas y simplemente no aparecen en el chat.
+alter table support_tickets add column if not exists user_email text not null default '';
+alter table support_tickets add column if not exists subject text not null default '';
+alter table support_tickets add column if not exists status text not null default 'open';
+alter table support_tickets add column if not exists created_at timestamptz not null default now();
+alter table support_tickets add column if not exists closed_at timestamptz;
+alter table support_tickets add column if not exists closed_by text;
+alter table support_messages add column if not exists ticket_id uuid references support_tickets(id) on delete cascade;
+alter table support_messages add column if not exists email text not null default '';
+alter table support_messages add column if not exists message text not null default '';
+alter table support_messages add column if not exists created_at timestamptz not null default now();
 
 create index if not exists support_tickets_email_idx on support_tickets (user_email);
 create index if not exists support_messages_ticket_idx on support_messages (ticket_id);
