@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>Ver creación – Better Discovery</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Full-page view: iframe on left, sidebar on right */
+    body { overflow-x: hidden; }
+
+    #loadingScreen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: calc(100vh - 60px);
+      flex-direction: column;
+      gap: 16px;
+      color: var(--text-muted);
+    }
+
+    #errorScreen {
+      display: none;
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-muted);
+    }
+
+    #mainContent { display: none; }
+
+    .tag-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.73rem;
+      background: rgba(99,102,241,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(99,102,241,0.3);
+    }
+
+    .no-comments {
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      text-align: center;
+      padding: 16px 0;
+    }
+
+    /* Fullscreen button */
+    .fs-btn {
+      width: 100%;
+      padding: 9px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-muted);
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+      margin-top: 8px;
+    }
+    .fs-btn:hover { border-color: var(--accent); color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="index.html">← Explorar</a>
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
+      <a href="upload.html" class="btn btn-primary">+ Subir</a>
+    </div>
+    <div class="nav-auth" id="navAuth"></div>
+  </nav>
+
+  <!-- Loading -->
+  <div id="loadingScreen">
+    <div class="spinner" style="margin:0"></div>
+    <span>Cargando creación…</span>
+  </div>
+
+  <!-- Error -->
+  <div id="errorScreen">
+    <div style="font-size:3rem;margin-bottom:16px">😕</div>
+    <h2 id="errorTitle" style="margin-bottom:8px">No se encontró la creación</h2>
+    <p id="errorMsg" style="max-width:400px;margin:0 auto 24px">Esta creación puede haber sido eliminada o el enlace es inválido.</p>
+    <a href="index.html" class="btn btn-primary">← Explorar todo</a>
+  </div>
+
+  <!-- Main content (shown after load) -->
+  <div id="mainContent">
+    <div class="view-layout">
+
+      <!-- iframe preview -->
+      <div class="preview-wrap" id="previewWrap">
+        <!-- Sandbox aislado para renderizar el HTML de forma segura:
+             sin allow-same-origin el contenido queda con origen null y
+             no puede tocar el DOM, cookies ni localStorage del sitio. -->
+        <iframe id="previewFrame"
+                sandbox="allow-scripts allow-forms allow-modals allow-popups"
+                title="Vista previa HTML"
+                allowfullscreen></iframe>
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="view-sidebar">
+
+        <!-- Info panel -->
+        <div class="panel">
+          <div class="panel-label">Creación</div>
+          <h1 class="view-title" id="snippetTitle">—</h1>
+          <p  class="view-desc"  id="snippetDesc"></p>
+          <div class="view-meta">
+            <span class="author-pill">
+              <span class="profile-dot large" id="snippetAuthorInitial">A</span>
+              <span id="snippetAuthor">—</span>
+            </span>
+            <span>📅 <span id="snippetDate">—</span></span>
+            <span id="snippetTagWrap" style="display:none">🏷️ <span class="tag-badge" id="snippetTag"></span></span>
+          </div>
+        </div>
+
+        <!-- Like + actions panel -->
+        <div class="panel">
+          <div class="panel-label">Acciones</div>
+          <button class="like-btn" id="likeBtn" onclick="handleLike()">
+            <span id="likeIcon">❤️</span>
+            <span id="likeLabel">Me gusta</span>
+            <strong id="likeCount">0</strong>
+          </button>
+          <button class="like-btn" id="followBtn" onclick="toggleFollow()" style="margin-top:10px">👤 Seguir autor</button>
+          <button class="fs-btn" id="fsBtn" type="button" onclick="toggleFullscreen()">⛶ A pantalla completa</button>
+          <button class="copy-btn" id="copyBtn" type="button" onclick="copyCode()">📋 Copiar código HTML</button>
+          <button class="copy-btn" id="shareBtn" type="button" onclick="copyShareLink()">🔗 Copiar enlace público</button>
+          <button class="copy-btn bookmark-btn" id="bookmarkBtn" type="button" onclick="toggleBookmarkSnippet()" aria-pressed="false">⭐ Guardar en Guardadas</button>
+        </div>
+
+        <!-- Comments panel -->
+        <div class="panel" style="flex:1">
+          <div class="panel-label">Comentarios</div>
+
+          <!-- List -->
+          <div class="comments-list" id="commentsList">
+            <div class="no-comments">Aún no hay comentarios. ¡Escribe el primero!</div>
+          </div>
+
+          <!-- New comment form -->
+          <div class="comment-form" id="commentForm">
+            <input id="commentAuthor" type="text" maxlength="60" placeholder="Tu nombre (opcional)">
+            <textarea id="commentText" maxlength="1000" rows="3" placeholder="Escribe un comentario…"></textarea>
+            <button class="btn btn-primary" onclick="submitComment()" style="width:100%;justify-content:center">
+              💬 Publicar comentario
+            </button>
+          </div>
+        </div>
+
+      </aside>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <a href="terms.html">Términos y condiciones</a>
+    <span>·</span>
+    <a href="privacy.html">Política de privacidad</a>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    /* ── Get snippet ID from URL ── */
+    const params      = new URLSearchParams(window.location.search);
+    const snippetId   = params.get('id');
+    let   snippetData = null;
+
+    /* ── Load snippet ── */
+    async function loadSnippet() {
+      if (!snippetId) { showError('No se indicó un ID', 'Agrega ?id=<snippet-id> en la URL.'); return; }
+
+      if (!IS_CONFIGURED) {
+        showError('Supabase no está configurado', 'Abre js/config.js y completa la URL y la clave anon en las líneas 11 y 12.');
+        return;
+      }
+
+      showLoadBar();
+      try {
+        const { data, error } = await supabaseClient
+          .from('snippets')
+          .select('*')
+          .eq('id', snippetId)
+          .single();
+
+        if (error || !data) throw error || new Error('No encontrado');
+
+        snippetData = data;
+        renderSnippet(data);
+        hideLoadBar();
+        loadComments();
+
+      } catch (err) {
+        hideLoadBar();
+        const notFound = err?.code === 'PGRST116' || /not found|no rows? returned/i.test(err?.message || '');
+        showError(
+          notFound ? 'No se encontró la creación' : 'No se pudo cargar la creación',
+          notFound
+            ? 'Esta creación puede haber sido eliminada o el enlace es inválido.'
+            : friendlyDbError(err)
+        );
+      }
+    }
+
+    function renderSnippet(s) {
+      document.title = `${s.title} – Better Discovery`;
+
+      document.getElementById('snippetTitle').textContent  = s.title;
+      const descEl = document.getElementById('snippetDesc');
+      descEl.textContent = s.description || '';
+      descEl.style.display = s.description ? '' : 'none';
+      const author = s.author || DEFAULT_AUTHOR_NAME;
+      const authorEl = document.getElementById('snippetAuthor');
+      authorEl.textContent = author;
+      // Badge exclusivo Discovery+ (si la creación es de un miembro conectado).
+      const oldBadge = authorEl.nextElementSibling;
+      if (oldBadge && oldBadge.classList && oldBadge.classList.contains('discovery-badge')) oldBadge.remove();
+      authorEl.insertAdjacentHTML('afterend', getDiscoveryPlusBadgeHtml(author));
+      const authorInitialEl = document.getElementById('snippetAuthorInitial');
+      if (authorInitialEl) authorInitialEl.textContent = getProfileInitial(author);
+      document.getElementById('snippetDate').textContent   = formatDate(s.created_at);
+
+      if (s.tag) {
+        const meta = tagMeta(s.tag);
+        document.getElementById('snippetTag').textContent = `${meta.emoji} ${meta.label}`;
+        document.getElementById('snippetTagWrap').style.display = '';
+      }
+
+      /* Update like button */
+      const liked = isLiked(s.id);
+      document.getElementById('likeCount').textContent = s.likes ?? 0;
+      if (liked) document.getElementById('likeBtn').classList.add('liked');
+      document.getElementById('likeBtn').setAttribute('aria-pressed', liked ? 'true' : 'false');
+      renderFollowButton(author);
+      renderBookmarkButton();
+
+      /* Set iframe content */
+      document.getElementById('previewFrame').srcdoc = s.html_content;
+
+      /* Nombre público por defecto en los comentarios */
+      const profileName = getProfileData().displayName;
+      if (profileName && profileName !== DEFAULT_AUTHOR_NAME) {
+        const ca = document.getElementById('commentAuthor');
+        if (!ca.value) ca.value = profileName;
+      }
+
+      /* Show main content (con entrada animada) */
+      document.getElementById('loadingScreen').style.display = 'none';
+      const main = document.getElementById('mainContent');
+      main.style.display   = 'block';
+      main.classList.add('view-enter');
+    }
+
+    /* ── Comments ── */
+    async function loadComments() {
+      try {
+        const { data, error } = await supabaseClient
+          .from('comments')
+          .select('id, author, content, created_at')
+          .eq('snippet_id', snippetId)
+          .order('created_at', { ascending: true });
+
+        if (error) throw error;
+        renderComments(data || []);
+      } catch {
+        const list = document.getElementById('commentsList');
+        list.innerHTML = `
+          <div class="no-comments">
+            ⚠️ No se pudieron cargar los comentarios.
+            <br><button type="button" class="btn btn-outline comment-retry"
+                    style="margin-top:10px;padding:5px 12px;font-size:0.78rem">Reintentar</button>
+          </div>`;
+        list.querySelector('.comment-retry').addEventListener('click', loadComments);
+      }
+    }
+
+    function renderComments(comments) {
+      const list = document.getElementById('commentsList');
+      if (!comments.length) {
+        list.innerHTML = '<div class="no-comments">Aún no hay comentarios. ¡Escribe el primero!</div>';
+        return;
+      }
+      list.innerHTML = comments.map(c => `
+        <div class="comment">
+          <div class="comment-header">
+            <span class="profile-dot">${escapeHtml(getProfileInitial(c.author || DEFAULT_AUTHOR_NAME))}</span>
+            <div class="comment-author">${escapeHtml(c.author || DEFAULT_AUTHOR_NAME)}</div>
+          </div>
+          <div class="comment-body">${escapeHtml(c.content)}</div>
+          <div class="comment-time">${timeAgo(c.created_at)}</div>
+        </div>`).join('');
+      /* Scroll to bottom of comment list */
+      list.scrollTop = list.scrollHeight;
+    }
+
+    async function submitComment() {
+      const author  = document.getElementById('commentAuthor').value.trim() || DEFAULT_AUTHOR_NAME;
+      const content = document.getElementById('commentText').value.trim();
+
+      if (!content) { showToast('El comentario no puede estar vacío.', 'error'); return; }
+      if (!IS_CONFIGURED) { showToast('Supabase no está configurado.', 'error'); return; }
+
+      const gate = bdThrottleCheck('comment');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+
+      const btn = document.querySelector('.comment-form .btn');
+      btn.disabled    = true;
+      btn.textContent = '⏳ Publicando…';
+
+      try {
+        const { error } = await supabaseClient
+          .from('comments')
+          .insert([{ snippet_id: snippetId, author, content }]);
+
+        if (error) throw error;
+        bdThrottleRecord('comment');
+
+        document.getElementById('commentText').value = '';
+        showToast('¡Comentario publicado!', 'success');
+        loadComments();
+
+      } catch (err) {
+        showToast(friendlyDbError(err), 'error', 5000);
+      } finally {
+        btn.disabled    = false;
+        btn.textContent = '💬 Publicar comentario';
+      }
+    }
+
+    /* ── Likes ── */
+    let likeBusy = false;
+
+    async function handleLike() {
+      if (likeBusy || !IS_CONFIGURED || !snippetData) return;
+      const gate = bdThrottleCheck('like');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+      likeBusy = true;
+
+      const btn = document.getElementById('likeBtn');
+      btn.disabled = true;
+
+      const { nowLiked } = toggleLike(snippetId);
+      const delta        = nowLiked ? 1 : -1;
+
+      /* Actualización optimista en la interfaz */
+      const optimistic = (snippetData.likes ?? 0) + delta;
+      snippetData.likes = optimistic;
+      document.getElementById('likeCount').textContent = optimistic;
+      btn.classList.toggle('liked', nowLiked);
+      btn.setAttribute('aria-pressed', nowLiked ? 'true' : 'false');
+
+      try {
+        /* Lectura fresca justo antes de escribir: reduce la ventana de
+           colisiones con otros usuarios (actualización perdida). */
+        const { data: fresh, error: readError } = await supabaseClient
+          .from('snippets')
+          .select('likes')
+          .eq('id', snippetId)
+          .single();
+        if (readError) throw readError;
+
+        bdThrottleRecord('like');
+        const target = Math.max(0, (fresh?.likes ?? 0) + delta);
+        const { error } = await supabaseClient
+          .from('snippets')
+          .update({ likes: target })
+          .eq('id', snippetId);
+        if (error) throw error;
+
+        snippetData.likes = target;
+        document.getElementById('likeCount').textContent = target;
+      } catch (err) {
+        /* Revert on failure */
+        const reverted = optimistic - delta;
+        snippetData.likes = reverted;
+        toggleLike(snippetId); // revert localStorage
+        document.getElementById('likeCount').textContent = reverted;
+        btn.classList.toggle('liked', !nowLiked);
+        showToast(friendlyDbError(err), 'error');
+      } finally {
+        likeBusy = false;
+        btn.disabled = false;
+      }
+    }
+
+    /* ── Fullscreen + copy code ── */
+    function toggleFullscreen() {
+      const wrap = document.getElementById('previewWrap');
+      if (!document.fullscreenElement) {
+        if (wrap.requestFullscreen) {
+          wrap.requestFullscreen().catch(() => showToast('Pantalla completa no disponible.', 'error'));
+        } else {
+          showToast('Este navegador no soporta pantalla completa.', 'error');
+        }
+      } else {
+        document.exitFullscreen();
+      }
+    }
+
+    document.addEventListener('fullscreenchange', () => {
+      const fsBtn = document.getElementById('fsBtn');
+      if (!fsBtn) return;
+      fsBtn.textContent = document.fullscreenElement
+        ? '⛶ Salir de pantalla completa'
+        : '⛶ A pantalla completa';
+    });
+
+    async function copyCode() {
+      if (!snippetData?.html_content) return;
+      const code = snippetData.html_content;
+      const btn = document.getElementById('copyBtn');
+
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(code);
+        } else {
+          /* Fallback para contextos sin Clipboard API */
+          const ta = document.createElement('textarea');
+          ta.value = code;
+          ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        btn.textContent = '✅ ¡Código copiado!';
+      } catch {
+        showToast('No se pudo copiar el código.', 'error');
+        return;
+      }
+      setTimeout(() => { btn.textContent = '📋 Copiar código HTML'; }, 2000);
+    }
+
+    async function copyShareLink() {
+      const url = window.location.href;
+      const btn = document.getElementById('shareBtn');
+      try {
+        if (navigator.clipboard && window.isSecureContext) {
+          await navigator.clipboard.writeText(url);
+        } else {
+          const ta = document.createElement('textarea');
+          ta.value = url;
+          ta.style.cssText = 'position:fixed;top:-1000px;opacity:0';
+          document.body.appendChild(ta);
+          ta.select();
+          document.execCommand('copy');
+          ta.remove();
+        }
+        btn.textContent = '✅ ¡Enlace copiado!';
+      } catch {
+        showToast('No se pudo copiar el enlace.', 'error');
+        return;
+      }
+      setTimeout(() => { btn.textContent = '🔗 Copiar enlace público'; }, 2000);
+    }
+
+    /* ── Guardadas (Discovery+) ── */
+    function renderBookmarkButton() {
+      const btn = document.getElementById('bookmarkBtn');
+      if (!btn || !snippetData) return;
+      const saved = isBookmarked(snippetData.id);
+      btn.textContent = saved ? '★ Guardada' : '⭐ Guardar en Guardadas';
+      btn.classList.toggle('saved', saved);
+      btn.setAttribute('aria-pressed', String(saved));
+    }
+
+    function toggleBookmarkSnippet() {
+      if (!snippetData) return;
+      if (!isDiscoveryPlusActive()) {
+        openDiscoveryPlusModal();
+        return;
+      }
+      const { nowBookmarked } = toggleBookmark(snippetData.id);
+      renderBookmarkButton();
+      showToast(nowBookmarked ? 'Guardada en tu perfil.' : 'Quitada de Guardadas.', 'success');
+    }
+
+    function renderFollowButton(author) {
+      const btn = document.getElementById('followBtn');
+      if (!btn) return;
+
+      const currentProfile = getProfileData().displayName;
+      const target = String(author || '').trim();
+      if (!target || target.toLowerCase() === currentProfile.toLowerCase()) {
+        btn.textContent = '👤 Es tu perfil';
+        btn.disabled = true;
+        return;
+      }
+
+      btn.disabled = false;
+      btn.textContent = isFollowingAuthor(target) ? '✓ Siguiendo' : '👤 Seguir autor';
+    }
+
+    function toggleFollow() {
+      if (!snippetData?.author) return;
+      const { nowFollowing } = toggleFollowAuthor(snippetData.author);
+      renderFollowButton(snippetData.author);
+      showToast(nowFollowing ? 'Autor seguido.' : 'Autor dejado de seguir.', 'success');
+    }
+
+    /* ── Error screen ── */
+    function showError(title, msg) {
+      document.getElementById('loadingScreen').style.display = 'none';
+      document.getElementById('errorScreen').style.display   = 'block';
+      document.getElementById('errorTitle').textContent = title;
+      document.getElementById('errorMsg').textContent   = msg;
+    }
+
+    async function initPage() {
+      await requireAuth({ redirect: false });
+      await renderAuthNav();
+      loadSnippet();
+    }
+
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

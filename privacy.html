@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>Privacy – Better Discovery</title>
+  <meta name="description" content="Política de privacidad de Better Discovery: datos tratados, bases legales, subprocesadores (Supabase, GitHub Pages, CDN), cookies y almacenamiento local, y tus derechos (RGPD/LOPDGDD).">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .policy-page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 50px 24px 90px;
+    }
+
+    .policy-page h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f0f0f0 40%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .policy-page > p,
+    .policy-page li,
+    .policy-box p,
+    .policy-box li {
+      color: var(--text-muted);
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+
+    .policy-page h2 {
+      margin-top: 34px;
+      margin-bottom: 10px;
+      font-size: 1.12rem;
+      color: var(--text-primary);
+      scroll-margin-top: 80px;
+    }
+
+    .policy-box {
+      background: linear-gradient(180deg, rgba(33,33,40,0.95) 0%, rgba(23,23,28,0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px;
+      margin-top: 24px;
+    }
+
+    .policy-toc {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px 24px;
+      margin: 18px 0 6px;
+      padding: 18px 22px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      list-style: none;
+    }
+    .policy-toc a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: block;
+      padding: 3px 0;
+      transition: color 0.15s;
+    }
+    .policy-toc a:hover { color: var(--accent); }
+    .policy-toc a span { color: var(--accent); margin-right: 8px; }
+
+    .policy-callout {
+      border-left: 3px solid var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      margin: 18px 0;
+      font-size: 0.9rem;
+    }
+
+    .policy-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 14px 0 6px;
+      font-size: 0.86rem;
+    }
+    .policy-table th,
+    .policy-table td {
+      text-align: left;
+      padding: 9px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: top;
+    }
+    .policy-table th {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      background: rgba(99, 102, 241, 0.07);
+    }
+    .policy-table tr:last-child td { border-bottom: none; }
+    .policy-table code {
+      font-size: 0.8rem;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 1px 6px;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 640px) {
+      .policy-toc { grid-template-columns: 1fr; }
+      .policy-table { display: block; overflow-x: auto; white-space: nowrap; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="index.html">Explorar</a>
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
+      <a href="privacy.html" class="active">Privacidad</a>
+    </div>
+    <div class="nav-auth" id="navAuth"></div>
+  </nav>
+
+  <main class="policy-page">
+    <h1>Política de privacidad</h1>
+    <p><strong>Última actualización: 25 de agosto de 2026.</strong> Esta versión sustituye a las anteriores.</p>
+    <p>
+      Esta política explica qué datos trata <strong>Better Discovery</strong> (el «Servicio»),
+      por qué los trata, durante cuánto tiempo y qué derechos tienes, conforme al Reglamento
+      (UE) 2016/679 (RGPD) y a la Ley Orgánica 3/2018 de Protección de Datos Personales y garantía
+      de los derechos digitales (LOPDGDD). El Servicio es una galería estática en GitHub Pages que
+      utiliza Supabase para autenticación y persistencia.
+    </p>
+
+    <ol class="policy-toc">
+      <li><a href="#s1"><span>1.</span>Responsable del tratamiento</a></li>
+      <li><a href="#s2"><span>2.</span>Datos que tratamos</a></li>
+      <li><a href="#s3"><span>3.</span>Finalidades y base legal</a></li>
+      <li><a href="#s4"><span>4.</span>Plazo de conservación</a></li>
+      <li><a href="#s5"><span>5.</span>Destinatarios y subprocesadores</a></li>
+      <li><a href="#s6"><span>6.</span>Transferencias internacionales</a></li>
+      <li><a href="#s7"><span>7.</span>Cookies y almacenamiento local</a></li>
+      <li><a href="#s8"><span>8.</span>Tus derechos</a></li>
+      <li><a href="#s9"><span>9.</span>Medidas de seguridad</a></li>
+      <li><a href="#s10"><span>10.</span>Menores de edad</a></li>
+      <li><a href="#s11"><span>11.</span>Cambios en esta política</a></li>
+      <li><a href="#s12"><span>12.</span>Contacto</a></li>
+    </ol>
+
+    <div class="policy-box">
+      <h2 id="s1">1. Responsable del tratamiento</h2>
+      <p>
+        El responsable del tratamiento es el <strong>titular del proyecto Better Discovery</strong>
+        (mantenedor del repositorio oficial en GitHub). El Servicio no opera bajo una entidad
+        mercantil ni trata datos con fines publicitarios.
+      </p>
+      <div class="policy-callout">
+        <strong>Nota:</strong> si el proyecto pasa a titularse de una persona o entidad concreta, o
+        se contrata un delegado de protección de datos, actualiza esta sección con su nombre, NIF y
+        canal de contacto.
+      </div>
+
+      <h2 id="s2">2. Datos que tratamos</h2>
+      <table class="policy-table">
+        <thead>
+          <tr><th>Categoría</th><th>Datos concretos</th><th>Origen</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>De cuenta</td>
+            <td>email, hash de contraseña, estado de la sesión y metadatos de usuario (entre ellos el estado de Discovery+)</td>
+            <td>Tu alta en Supabase Auth</td>
+          </tr>
+          <tr>
+            <td>De contenido</td>
+            <td>título (máx. 120 caracteres), descripción (máx. 500), autor o nombre público (máx. 60), categoría y HTML de la creación (máx. 1 MB)</td>
+            <td>Tu publicación</td>
+          </tr>
+          <tr>
+            <td>De interacción</td>
+            <td>comentarios (máx. 1.000 caracteres) con nombre visible, likes por creación, personas seguidas, Guardadas</td>
+            <td>Tu uso del Servicio</td>
+          </tr>
+          <tr>
+            <td>De perfil</td>
+            <td>nombre público y biografía (máx. 240 caracteres); se guardan en tu navegador como caché y se sincronizan con tu cuenta</td>
+            <td>Tu perfil, disponible en cualquier dispositivo</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        No tratamos datos sensibles (salud, origen étnico, orientación, creencias…), ni datos de
+        menores de forma deliberada, ni utilizamos los datos con fines publicitarios o de
+        perfilado automatizado.
+      </p>
+
+      <h2 id="s3">3. Finalidades y base legal</h2>
+      <table class="policy-table">
+        <thead>
+          <tr><th>Finalidad</th><th>Base legal</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Autenticación y mantenimiento de sesión (Supabase Auth)</td><td>Ejecución del servicio a tu petición (art. 6.1.b RGPD) y consentimiento (art. 6.1.a)</td></tr>
+          <tr><td>Publicar y mostrar tus creaciones, likes, comentarios y perfil</td><td>Ejecución del servicio (art. 6.1.b RGPD)</td></tr>
+          <tr><td>Funciones de Discovery+ (feed «Siguiendo», filtros, Guardadas, estadísticas)</td><td>Ejecución del servicio y consentimiento (art. 6.1.a-b RGPD)</td></tr>
+          <tr><td>Seguridad, prevención de abuso y moderación</td><td>Interés legítimo del responsable (art. 6.1.f RGPD)</td></tr>
+        </tbody>
+      </table>
+
+      <h2 id="s4">4. Plazo de conservación</h2>
+      <ul>
+        <li><strong>Datos de cuenta y contenido:</strong> mientras mantengas tu cuenta y tu contenido publicado; al eliminar una creación o solicitar el borrado, se elimina en Supabase (incluidos los comentarios asociados a la creación eliminada).</li>
+        <li><strong>Datos locales del navegador:</strong> hasta que los borres tú desde tu perfil, desde tu navegador o desde la configuración de almacenamiento local.</li>
+        <li><strong>Sesiones:</strong> la sesión de Supabase expira según la política del proveedor (por defecto, 1 hora de token de acceso con renovación); puedes cerrar sesión cuando quieras.</li>
+      </ul>
+
+      <h2 id="s5">5. Destinatarios y subprocesadores</h2>
+      <table class="policy-table">
+        <thead>
+          <tr><th>Proveedor</th><th>Qué datos</th><th>Finalidad</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Supabase (Supabase Inc., EE. UU.)</td>
+            <td>Cuenta, sesión, metadatos de usuario y toda la base de datos del Servicio (creaciones, comentarios, likes, seguimientos)</td>
+            <td>Autenticación y almacenamiento (base de datos Postgres)</td>
+          </tr>
+          <tr>
+            <td>GitHub / GitHub Pages (GitHub Inc., EE. UU.)</td>
+            <td>Nada personal: solo el código del sitio y las estadísticas de tráfico agregadas del hosting</td>
+            <td>Albergue y publicación del sitio estático</td>
+          </tr>
+          <tr>
+            <td>jsDelivr (CDN de Netlify, EE. UU.)</td>
+            <td>Solo la dirección IP de tu petición (logs técnicos del CDN)</td>
+            <td>Servicio del SDK de Supabase (fijado con SRI)</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        El Servicio no utiliza plataformas de analítica propia, píxeles de redes sociales ni
+        herramientas de marketing.
+      </p>
+
+      <h2 id="s6">6. Transferencias internacionales</h2>
+      <p>
+        Supabase y GitHub almacenan y procesan datos en centros de datos de los Estados Unidos, por lo
+        que se producen transferencias internacionales a un país fuera del Espacio Económico Europeo.
+        En el caso de Supabase, la transferencia se ampara en las <em>cláusulas contractuales
+        tipo</em> de la Comisión Europea (Decisión 2021/914) o en las <em>Decisiones de
+        Adecuación</em> aplicables (Marco UE-EE. UU. de Privacidad), conforme a su política vigente;
+        te recomendamos revisar sus políticas de privacidad para conocer las garantías concretas.
+      </p>
+
+      <h2 id="s7">7. Cookies y almacenamiento local</h2>
+      <p>
+        El Servicio <strong>no utiliza cookies publicitarias ni de terceros</strong>. Utiliza
+        únicamente almacenamiento local del navegador (<code>localStorage</code>) para:
+      </p>
+      <table class="policy-table">
+        <thead>
+          <tr><th>Clave</th><th>Qué guarda</th><th>Para qué</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>supabase-&lt;url&gt;-auth-token</code></td><td>Tu sesión (token de acceso)</td><td>Mantenerte autenticado entre páginas</td></tr>
+          <tr><td><code>bd_profile</code></td><td>Nombre público y biografía (caché local; se sincronizan con tu cuenta)</td><td>Preseleccionar tu perfil en formularios</td></tr>
+          <tr><td><code>bd_liked</code></td><td>Creaciones a las que has dado like (en este dispositivo)</td><td>Mostrar el estado del botón</td></tr>
+          <tr><td><code>bd_db_config</code></td><td>URL y clave anon de un proyecto Supabase que hayas <em>vinculado desde el sitio</em> (solo si usas el botón «⚙️ BD»)</td><td>Conectar la app a tu propia base de datos sin modificar <code>js/config.js</code></td></tr>
+          <tr><td><code>bd_bookmarks</code></td><td>Tus Guardadas (en este dispositivo)</td><td>Función Guardadas de Discovery+</td></tr>
+          <tr><td><code>bd_followed_authors</code></td><td>Personas que sigues</td><td>Feed «Siguiendo» y estadísticas</td></tr>
+          <tr><td><code>bd_owned_snippets</code></td><td>Identificadores de tus creaciones en este dispositivo</td><td>Permitir borrarlas desde tu perfil</td></tr>
+        </tbody>
+      </table>
+      <p>
+        Puedes borrar estos datos en cualquier momento: borrar el almacenamiento local del sitio en
+        tu navegador (o cerrar la pestaña en modo incógnito). Al hacerlo perderás la sesión local y
+        las preferencias por dispositivo; tu contenido publicado en el servidor no se ve afectado.
+        Al <strong>cerrar sesión desde el sitio</strong>, los datos de usuario locales (perfil,
+        likes, Guardadas, seguidos y creaciones propias) se borran automáticamente para que el
+        siguiente usuario del dispositivo no los herede.
+      </p>
+      <p>
+        Por seguridad, el servicio conserva un <strong>registro de auditoría</strong> con eventos
+        relevantes (iniciar/cerrar sesión, subidas y borrados de creaciones, suscripciones y canjes
+        de Discovery+ y cambios de perfil), asociado a tu email cuando estás autenticado.
+      </p>
+
+      <h2 id="s8">8. Tus derechos</h2>
+      <p>
+        Conforme al RGPD y la LOPDGDD, tienes derecho a:
+      </p>
+      <ul>
+        <li><strong>Acceso:</strong> saber qué datos tenemos sobre ti y cómo los usamos.</li>
+        <li><strong>Rectificación:</strong> corregir datos inexactos (por ejemplo, tu perfil desde la propia interfaz).</li>
+        <li><strong>Supresión:</strong> solicitar el borrado de tu cuenta y tu contenido (puedes eliminar tus creaciones desde tu perfil; para el resto de datos, utiliza el canal de contacto).</li>
+        <li><strong>Limitación y oposición:</strong> pedir que limitemos o dejemos de tratar tus datos, cuando proceda.</li>
+        <li><strong>Portabilidad:</strong> recibir tus datos en un formato estructurado y de uso común.</li>
+        <li><strong>Retirada del consentimiento:</strong> en lo que respecta a los tratamientos basados en él.</li>
+      </ul>
+      <p>
+        Para ejercer estos derechos, contacta por el canal indicado en la sección 12, identificándote
+        con tu email de cuenta. Responderemos en el plazo máximo de un mes. Si no estás conforme con
+        la respuesta, puedes presentar reclamación ante la <strong>Agencia Española de Protección de
+        Datos</strong> (<a href="https://www.aepd.es" rel="noopener">www.aepd.es</a>).
+      </p>
+
+      <h2 id="s9">9. Medidas de seguridad</h2>
+      <ul>
+        <li><strong>Aislamiento del contenido publicado:</strong> cada creación se ejecuta en un <code>&lt;iframe&gt;</code> con <code>sandbox</code> restringido y sin acceso al origen del sitio: no puede leer cookies, ni el almacenamiento local, ni el DOM de Better Discovery.</li>
+        <li><strong>Cabeceras de seguridad:</strong> CSP, <code>X-Frame-Options: DENY</code>, <code>Referrer-Policy</code> y <code>Permissions-Policy</code> (sin cámara, micrófono, geolocalización, pago ni USB).</li>
+        <li><strong>Dependencias fijadas (SRI):</strong> el SDK de Supabase se carga con versión exacta y atributo <code>integrity</code>; cualquier alteración del archivo remoto se rechaza en el navegador.</li>
+        <li><strong>Escapado de salida:</strong> todos los datos del servidor se insertan en la interfaz escapados, evitando inyección de HTML.</li>
+        <li><strong>Base de datos:</strong> se recomienda mantener activadas las políticas de Row Level Security (RLS) en Supabase, de modo que el acceso a los datos esté condicionado al estado de autenticación.</li>
+        <li><strong>Contraseñas:</strong> se almacenan cifradas (hash) en Supabase Auth; nadie, incluido el responsable, puede leer tu contraseña.</li>
+      </ul>
+      <p>
+        Aun así, ninguna medida es infalible. Si detectas una vulnerabilidad, notifica por el canal
+        de contacto sin publicar detalles públicos hasta recibir respuesta.
+      </p>
+
+      <h2 id="s10">10. Menores de edad</h2>
+      <p>
+        El Servicio no está dirigido a menores de 16 años de forma directa. Los menores pueden
+        utilizarlo con el consentimiento y la supervisión de sus padres, madres o tutores legales,
+        que serán los responsables de ejercer los derechos de protección de datos en su nombre.
+      </p>
+
+      <h2 id="s11">11. Cambios en esta política</h2>
+      <p>
+        Esta política se puede actualizar ante cambios técnicos, legales o de producto. La fecha de
+        «última actualización» de la cabecera indica la versión vigente; los cambios relevantes se
+        comunicarán en la interfaz o en el repositorio del proyecto.
+      </p>
+
+      <h2 id="s12">12. Contacto</h2>
+      <p>
+        Para cualquier cuestión sobre privacidad o para ejercer tus derechos, abre un <em>issue</em>
+        en el <a href="https://github.com/jaime-gaming/Better-Discovery" rel="noopener">repositorio oficial</a>
+        con el título «Privacidad / DPO», o contacta con el mantenedor a través de su perfil de
+        GitHub.
+      </p>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <a href="terms.html">Términos y condiciones</a>
+    <span>·</span>
+    <a href="about.html">Acerca de</a>
+    <span>·</span>
+    <a href="discovery-plus.html">⚡ Discovery+</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    async function initPage() {
+      await requireAuth({ redirect: false });
+      await renderAuthNav();
+    }
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

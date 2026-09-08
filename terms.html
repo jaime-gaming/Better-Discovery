@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>ToS – Better Discovery</title>
+  <meta name="description" content="Términos y condiciones de uso de Better Discovery: cuentas, contenido, propiedad intelectual, Discovery+, limitación de responsabilidad y ley aplicable.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .policy-page {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 50px 24px 90px;
+    }
+
+    .policy-page h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #f0f0f0 40%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .policy-page > p,
+    .policy-page li,
+    .policy-box p,
+    .policy-box li {
+      color: var(--text-muted);
+      line-height: 1.8;
+      font-size: 0.95rem;
+    }
+
+    .policy-page h2 {
+      margin-top: 34px;
+      margin-bottom: 10px;
+      font-size: 1.12rem;
+      color: var(--text-primary);
+      scroll-margin-top: 80px;
+    }
+
+    .policy-box {
+      background: linear-gradient(180deg, rgba(33,33,40,0.95) 0%, rgba(23,23,28,0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 26px;
+      margin-top: 24px;
+    }
+
+    .policy-toc {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px 24px;
+      margin: 18px 0 6px;
+      padding: 18px 22px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      list-style: none;
+    }
+    .policy-toc a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.88rem;
+      display: block;
+      padding: 3px 0;
+      transition: color 0.15s;
+    }
+    .policy-toc a:hover { color: var(--accent); }
+    .policy-toc a span { color: var(--accent); margin-right: 8px; }
+
+    .policy-callout {
+      border-left: 3px solid var(--accent);
+      background: rgba(99, 102, 241, 0.08);
+      border-radius: 0 10px 10px 0;
+      padding: 12px 16px;
+      margin: 18px 0;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 640px) {
+      .policy-toc { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="index.html">Explorar</a>
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
+      <a href="terms.html" class="active">Términos</a>
+    </div>
+    <div class="nav-auth" id="navAuth"></div>
+  </nav>
+
+  <main class="policy-page">
+    <h1>Términos y condiciones</h1>
+    <p><strong>Última actualización: 25 de agosto de 2026.</strong> Esta versión sustituye a las anteriores.</p>
+    <p>
+      Estos términos y condiciones (los «Términos») regulan el uso de <strong>Better Discovery</strong>,
+      una galería comunitaria de creaciones HTML publicada en GitHub Pages y conectada a Supabase
+      (en conjunto, el «Servicio»). Al crear una cuenta, publicar contenido o utilizar el Servicio de
+      cualquier forma, aceptas estos Términos y la <a href="privacy.html">política de privacidad</a>.
+      Si no los aceptas, no utilices el Servicio.
+    </p>
+
+    <ol class="policy-toc">
+      <li><a href="#s1"><span>1.</span>El servicio</a></li>
+      <li><a href="#s2"><span>2.</span>Cuentas</a></li>
+      <li><a href="#s3"><span>3.</span>Obligaciones al usar el Servicio</a></li>
+      <li><a href="#s4"><span>4.</span>Contenido que publicas</a></li>
+      <li><a href="#s5"><span>5.</span>Contenido prohibido</a></li>
+      <li><a href="#s6"><span>6.</span>Moderación y suspensión</a></li>
+      <li><a href="#s7"><span>7.</span>Propiedad intelectual</a></li>
+      <li><a href="#s8"><span>8.</span>Likes, comentarios y perfiles</a></li>
+      <li><a href="#s9"><span>9.</span>Discovery+</a></li>
+      <li><a href="#s10"><span>10.</span>Disponibilidad y cambios del Servicio</a></li>
+      <li><a href="#s11"><span>11.</span>Limitación de responsabilidad</a></li>
+      <li><a href="#s12"><span>12.</span>Indemnización</a></li>
+      <li><a href="#s13"><span>13.</span>Terminación</a></li>
+      <li><a href="#s14"><span>14.</span>Ley aplicable y jurisdicción</a></li>
+      <li><a href="#s15"><span>15.</span>Cambios de estos Términos</a></li>
+      <li><a href="#s16"><span>16.</span>Contacto</a></li>
+    </ol>
+
+    <div class="policy-box">
+      <h2 id="s1">1. El servicio</h2>
+      <p>
+        Better Discovery es una galería abierta que permite publicar creaciones en HTML (un único
+        documento con CSS y JavaScript embebidos, con un tamaño máximo de <strong>1 MB</strong> por
+        creación), visualizarlas en una vista previa aislada e interactuar mediante likes, comentarios
+        y perfiles públicos. La plataforma está diseñada como sitio estático servido desde GitHub
+        Pages; la autenticación y la persistencia de datos se apoyan en Supabase.
+      </p>
+      <p>
+        El Servicio incluye funciones gratuitas y funciones premium agrupadas bajo el plan
+        <strong>Discovery+</strong> (feed «Siguiendo», filtros por categoría, Guardadas y
+        estadísticas ampliadas). Discovery+ es una suscripción mensual de 3,99 €: al suscribirte
+        se genera una solicitud que un moderador canjea; activada, la suscripción es vigente
+        durante 30 días.
+      </p>
+
+      <h2 id="s2">2. Cuentas</h2>
+      <ul>
+        <li>Para publicar, comentar como autor identificado o activar Discovery+ necesitas una cuenta, gestionada mediante Supabase Auth (email y contraseña).</li>
+        <li>Debes proporcionar información exacta y mantenerla actualizada. Puedes usar un nombre público distinto a tu nombre real.</li>
+        <li>Debes mantener la confidencialidad de tus credenciales y notificar cualquier uso no autorizado de tu cuenta de inmediato.</li>
+        <li>Eres responsable de toda actividad realizada desde tu cuenta mientras la mantengas activa.</li>
+        <li>El Servicio está dirigido a personas con capacidad legal para contratar; si tienes menos de 16 años, requiere la supervisión y el consentimiento de un padre, madre o tutor.</li>
+      </ul>
+
+      <h2 id="s3">3. Obligaciones al usar el Servicio</h2>
+      <p>No usarás el Servicio para:</p>
+      <ul>
+        <li>infringir leyes, regulaciones o derechos de terceros;</li>
+        <li>acceder, interferir o sobrecargar el Servicio o su infraestructura (Supabase, GitHub Pages), incluidas automatizaciones que eludan las interfaces normales;</li>
+        <li>intentar obtener acceso no autorizado a cuentas, sistemas o datos de otras personas;</li>
+        <li>recopilar datos de otras personas (scraping) para fines no permitidos;</li>
+        <li>publicar spam, contenido publicitario masivo o encadenado, ni participar en prácticas de engaño (como inflar likes o comentarios);</li>
+        <li>revender, alquilar ni ofrecer el Servicio a terceros sin autorización expresa.</li>
+      </ul>
+
+      <h2 id="s4">4. Contenido que publicas</h2>
+      <p>
+        Admitimos documentos HTML completos y autónomos (con CSS y JavaScript embebidos) que puedan
+        renderizarse en un navegador moderno. Al publicar una creación, confirmas que:
+      </p>
+      <ul>
+        <li>es original tuya o cuentas con la autorización suficiente para publicarla;</li>
+        <li>cumple con las leyes aplicables y con estos Términos;</li>
+        <li>no contiene malware, phishing, scripts de rastreo encubiertos ni código diseñado para dañar el equipo o el navegador de otras personas;</li>
+        <li>respeta los límites técnicos del Servicio (tamaño máximo de 1 MB, título de 120 caracteres y descripción de 500 caracteres).</li>
+      </ul>
+
+      <h2 id="s5">5. Contenido prohibido</h2>
+      <ul>
+        <li>Archivos ZIP u otros formatos que no sean HTML (el Servicio solo admite un documento HTML por creación).</li>
+        <li>Copias, clones o derivados no autorizados de creaciones ajenas.</li>
+        <li>Contenido ilegal, fraudulento, difamatorio, pornográfico no consensuado o que promueva la violencia o el odio.</li>
+        <li>Código destinado a robar credenciales, secuestrar navegadores, minar criptomonedas o explotar la plataforma.</li>
+        <li>Cualquier contenido que infrinja la propiedad intelectual, la privacidad o los demás derechos de terceros.</li>
+      </ul>
+
+      <h2 id="s6">6. Moderación y suspensión</h2>
+      <p>
+        El titular del proyecto puede revisar, ocultar o eliminar cualquier creación, comentario o
+        cuenta que incumpla estos Términos, o que plantee riesgos técnicos o legales, previa o sin
+        previo aviso en los casos de urgencia. También puede suspender temporalmente el acceso a
+        funciones concretas cuando se detecte abuso, spam o automatización indebida, comunicándolo
+        por los canales habituales cuando sea posible.
+      </p>
+
+      <h2 id="s7">7. Propiedad intelectual</h2>
+      <p>
+        <strong>Tus creaciones son tuyas.</strong> Conservas todos los derechos sobre el contenido que
+        publicas. Al publicarlo, nos concedes una licencia gratuita, no exclusiva, irrevocable mientras
+        el contenido esté publicado y de alcance mundial, limitada a almacenarlo, mostrarlo,
+        transmitirlo y generar vistas previas dentro del Servicio.
+      </p>
+      <p>
+        El código del Servicio (interfaz, diseño y utilidades) se publica bajo la licencia indicada en
+        el archivo <code>LICENSE</code> del repositorio. El nombre y el logotipo «Better Discovery»
+        pertenecen al titular del proyecto.
+      </p>
+
+      <h2 id="s8">8. Likes, comentarios y perfiles</h2>
+      <ul>
+        <li>Los comentarios se publican con el nombre que indiques (puedes comentar sin cuenta, en cuyo caso figurarás como «Anónimo» o con el nombre que escribas).</li>
+        <li>Eres responsable de lo que comentas: aplica la misma regla de contenido que para las creaciones.</li>
+        <li>Los datos de perfil (nombre público, biografía) y las listas de seguimiento son visibles públicamente en el perfil.</li>
+        <li>Los likes y las Guardadas por dispositivo se conservan en tu navegador (ver <a href="privacy.html">política de privacidad</a>).</li>
+      </ul>
+
+      <h2 id="s9">9. Discovery+</h2>
+      <p>
+        Discovery+ desbloquea el feed «Siguiendo», los filtros por categoría, Guardadas, las
+        estadísticas ampliadas, las cargas de hasta 5 MB y la insignia de miembro. El plan cuesta
+        <strong>3,99 € al mes</strong>. Al suscribirte se genera una solicitud con un código de canje:
+        cuando un moderador canjea ese código, la suscripción queda <em>activa</em> durante
+        <strong>30 días</strong>, y a su vencimiento deberás generar una nueva solicitud para
+        renovarla. También puedes obtener acceso con un <strong>código de Discovery+</strong>
+        facilitado por el equipo: al canjearlo desde la
+        <a href="discovery-plus.html">página de Discovery+</a> se activa tu suscripción durante
+        30 días o, si ya la tienes activa, se amplía 30 días más; cada código es único e inservible
+        una vez canjeado. Puedes cancelar la suscripción en cualquier momento desde tu perfil o
+        desde la <a href="discovery-plus.html">página de Discovery+</a>; al cancelar no perderás
+        tus creaciones. El estado de la suscripción se asocia a tu cuenta y viaja contigo entre
+        dispositivos.
+      </p>
+
+      <h2 id="s10">10. Disponibilidad y cambios del Servicio</h2>
+      <p>
+        El Servicio se ofrece «tal cual» y «tal como está disponible». Podemos modificar, pausar o
+        descontinuar funciones (incluidas las de Discovery+) con un aviso razonable cuando el cambio
+        sea relevante. No garantizamos que el Servicio esté disponible de forma ininterrumpida, libre de
+        errores o exento de virus.
+      </p>
+
+      <h2 id="s11">11. Limitación de responsabilidad</h2>
+      <p>
+        En la máxima medida permitida por la ley, el titular del Servicio no responderá por daños
+        indirectos, incidentales, especiales o consecuentes, ni por pérdida de datos, beneficios o
+        oportunidades, derivados del uso del Servicio o de contenido publicado por terceros. El
+        contenido de otros usuarios no representa ni refleja la opinión del titular del proyecto.
+        Tu única acción frente a un contenido inapropiado es dejar de usarlo o solicitar su
+        retirada mediante el canal de contacto de la sección 16.
+      </p>
+
+      <h2 id="s12">12. Indemnización</h2>
+      <p>
+        Asumirás la responsabilidad por las pérdidas, reclamaciones y costes (incluidos honorarios
+        razonables de abogado) derivados del incumplimiento de estos Términos o de la infracción de
+        derechos de terceros por tu parte, y colaborarás razonablemente en su defensa.
+      </p>
+
+      <h2 id="s13">13. Terminación</h2>
+      <p>
+        Puedes dejar de usar el Servicio en cualquier momento; tu contenido publicado seguirá
+        disponible salvo que solicites su eliminación. El titular puede denegar el acceso o eliminar
+        contenido y cuentas que incumplan estos Términos. Las secciones que por su naturaleza deben
+        sobrevivir a la terminación (propiedad intelectual, limitación de responsabilidad,
+        indemnización y jurisdicción) permanecerán vigentes.
+      </p>
+
+      <h2 id="s14">14. Ley aplicable y jurisdicción</h2>
+      <p>
+        Estos Términos se rigen por la legislación española. Para la resolución de cualquier disputa,
+        las partes se someten a los juzgados y tribunales del domicilio del usuario, con renuncia a
+        cualquier otro fuero, sin perjuicio de los derechos que la normativa de consumo reconozca a las
+        personas consumidoras.
+      </p>
+
+      <h2 id="s15">15. Cambios de estos Términos</h2>
+      <p>
+        Podemos actualizar estos Términos cuando sea necesario (cambios legales, técnicos o de
+        producto). La fecha de «última actualización» de la cabecera indica la versión vigente. Si el
+        cambio es material, se reflejará en la interfaz o en el repositorio del proyecto. Tu uso
+        continuado tras la actualización supone la aceptación de la nueva versión.
+      </p>
+
+      <h2 id="s16">16. Contacto</h2>
+      <p>
+        Para cualquier asunto relacionado con estos Términos (reclamaciones de propiedad
+        intelectual, retirada de contenido, consultas), puedes contactarnos abriendo un <em>issue</em>
+        en el <a href="https://github.com/jaime-gaming/Better-Discovery" rel="noopener">repositorio oficial del proyecto</a>
+        indicando en el título «Legal / ToS», o bien a través del perfil del mantenedor en GitHub.
+      </p>
+      <div class="policy-callout">
+        <strong>Nota:</strong> si este proyecto se comercializa o se asocia a una persona o entidad
+        concreta, sustituye el contacto de esta sección por el canal oficial de la misma.
+      </div>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <a href="privacy.html">Política de privacidad</a>
+    <span>·</span>
+    <a href="about.html">Acerca de</a>
+    <span>·</span>
+    <a href="discovery-plus.html">⚡ Discovery+</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    async function initPage() {
+      await requireAuth({ redirect: false });
+      await renderAuthNav();
+    }
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

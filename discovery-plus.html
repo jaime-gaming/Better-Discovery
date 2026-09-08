@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>Discovery+ – Better Discovery</title>
+  <meta name="description" content="Discovery+ por 3,99 €/mes: el feed «Siguiendo», los filtros por categoría, Guardadas y estadísticas ampliadas. Se activa cuando un moderador canjea tu solicitud.">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- ── Navigation ── -->
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="index.html">Explorar</a>
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html" class="active">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
+      <a href="upload.html" class="btn btn-primary">+ Subir</a>
+    </div>
+    <div class="nav-auth" id="navAuth"></div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <section class="hero dp-hero">
+    <span class="dp-badge">⚡ Mejor descubrimiento, a tu manera</span>
+    <h1>Discovery<span class="dp-plus-mark">+</span></h1>
+    <p>El plan premium de Better Discovery: sigue a tus personas favoritas, filtra por lo que te gusta, guarda tus creaciones preferidas y mide cómo rinden las tuyas.</p>
+    <div class="dp-action" id="dpHeroAction"></div>
+    <p class="dp-member-note" id="dpMemberNote" hidden></p>
+    <p class="dp-trust">🔒 Solicitud verificada · 👤 Para creadores · ⚡ Activación al canjear</p>
+  </section>
+
+  <!-- ── Estado de la suscripción ── -->
+  <section class="dp-section">
+    <div class="dp-status-card" id="dpStatusCard" data-reveal>
+      <h2 class="dp-section-title">Tu suscripción</h2>
+      <div class="dp-status-chips" id="dpStatusChips">
+        <div class="chip"><span class="chip-k">Estado</span><span class="chip-v" id="dpChipStatus">Comprobando…</span></div>
+        <div class="chip"><span class="chip-k">Precio</span><span class="chip-v" id="dpChipPrice">—</span></div>
+        <div class="chip"><span class="chip-k">Vigencia</span><span class="chip-v" id="dpChipExpires">—</span></div>
+      </div>
+      <div class="dp-redeem-box" id="dpRedeemBox" hidden>
+        <span>Tu código de canje (compártelo con un moderador si te lo pide):</span>
+        <code id="dpRedeemCode">—</code>
+      </div>
+      <div class="dp-code-box">
+        <span>¿Tienes un <strong>código de Discovery+</strong>? Canjéalo aquí: activa tu suscripción
+        (30 días) o, si ya tienes Discovery+, le suma 30 días.</span>
+        <div class="dp-code-row">
+          <input id="dpCodeInput" class="form-input" type="text" placeholder="BDP-XXXX-XXXX" maxlength="32" autocomplete="off">
+          <button type="button" class="btn btn-primary" id="dpCodeBtn">Canjear código</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Perks ── -->
+  <section class="dp-section">
+    <h2 class="dp-section-title">Todo lo que incluye</h2>
+    <div class="feature-grid dp-perks-grid">
+      <div class="feature-card dp-feature" data-reveal>
+        <div class="ico">📡</div>
+        <h3>Feed «Siguiendo»</h3>
+        <p>Pestaña en Explorar con solo creaciones de las personas que sigues. Tu comunidad, primero.</p>
+      </div>
+      <div class="feature-card dp-feature" data-reveal>
+        <div class="ico">🏷️</div>
+        <h3>Filtros por categoría</h3>
+        <p>Busca juegos, arte, herramientas, interactivos y más con un solo clic.</p>
+      </div>
+      <div class="feature-card dp-feature" data-reveal>
+        <div class="ico">⭐</div>
+        <h3>Guardadas</h3>
+        <p>Marca tus creaciones favoritas y vuelve a ellas desde tu perfil cuando quieras.</p>
+      </div>
+      <div class="feature-card dp-feature" data-reveal>
+        <div class="ico">📊</div>
+        <h3>Estadísticas ampliadas</h3>
+        <p>Me gusta y comentarios recibidos por tus creaciones, todo en un vistazo.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Cómo funciona ── -->
+  <section class="dp-section">
+    <h2 class="dp-section-title">Cómo funciona</h2>
+    <div class="dp-steps">
+      <div class="dp-step" data-reveal>
+        <span class="dp-step-num">1</span>
+        <h3>Entra con tu cuenta</h3>
+        <p>Si aún no tienes cuenta, créala gratis en segundos con tu email.</p>
+      </div>
+      <div class="dp-step" data-reveal>
+        <span class="dp-step-num">2</span>
+        <h3>Suscríbete (3,99 €/mes)</h3>
+        <p>Genera una solicitud con tu código de canje. Un moderador la canjea y tu suscripción queda activa.</p>
+      </div>
+      <div class="dp-step" data-reveal>
+        <span class="dp-step-num">3</span>
+        <h3>Disfruta 30 días</h3>
+        <p>Feed de quienes sigues, filtros, guardadas y estadísticas al momento. Renueva cuando quieras.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Planes ── -->
+  <section class="dp-section">
+    <h2 class="dp-section-title">Elige tu plan</h2>
+    <div class="dp-price-grid">
+      <div class="dp-plan" data-reveal>
+        <h3>Gratis</h3>
+        <p class="dp-plan-price">0 € <small>para siempre</small></p>
+        <ul class="dp-plan-list">
+          <li>Ver toda la galería</li>
+          <li>Subir hasta 1 MB de HTML</li>
+          <li>Likes y comentarios</li>
+          <li>Perfil público y espacio usado</li>
+        </ul>
+        <a href="index.html" class="btn btn-outline dp-plan-cta">Explorar gratis</a>
+      </div>
+      <div class="dp-plan featured" data-reveal>
+        <span class="dp-plan-tag">Recomendado</span>
+        <h3>Discovery<span class="dp-plus-mark">+</span></h3>
+        <p class="dp-plan-price">3,99 € <small>/ mes</small></p>
+        <ul class="dp-plan-list">
+          <li>Todo lo del plan Gratis</li>
+          <li>Feed «Siguiendo»</li>
+          <li>Filtros por categoría</li>
+          <li>Guardadas en tu perfil</li>
+          <li>Estadísticas ampliadas</li>
+          <li>Cargas de hasta 5 MB</li>
+          <li>Insignia ⚡ de miembro</li>
+        </ul>
+        <div class="dp-action" id="dpPriceAction"></div>
+        <p class="dp-fineprint">Suscripción mensual de 3,99 €. Se activa cuando un moderador canjea tu solicitud y está vigente durante 30 días.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FAQ ─ -->
+  <section class="dp-section">
+    <h2 class="dp-section-title">Preguntas frecuentes</h2>
+    <div class="dp-faq">
+      <details>
+        <summary>¿Cuánto cuesta Discovery+?</summary>
+        <p>3,99 € al mes. Cada suscripción canjeada da 30 días de acceso; al terminar, renueva generando otra solicitud.</p>
+      </details>
+      <details>
+        <summary>¿Cuándo se activa?</summary>
+        <p>Al suscribirte generas una solicitud con un código de canje. Cuando un moderador canjea ese código en su panel, tu suscripción queda activa durante 30 días.</p>
+      </details>
+      <details>
+        <summary>¿Necesito una cuenta?</summary>
+        <p>Sí: Discovery+ viaja con tu cuenta de Better Discovery (en Supabase), por lo que lo tienes disponible en cualquier dispositivo donde inicies sesión.</p>
+      </details>
+      <details>
+        <summary>¿Qué pasa con mis creaciones si dejo de ser miembro?</summary>
+        <p>Tu contenido es tuyo: sigue publicado y visible en la galería. Descubrirías únicamente las funciones exclusivas del plan (feed «Siguiendo», filtros, guardadas y estadísticas).</p>
+      </details>
+      <details>
+        <summary>¿Puedo cancelar cuando quiera?</summary>
+        <p>Sí: desde tu perfil (sección Discovery+) o desde esta página puedes cancelar la suscripción. No pierdes tus creaciones.</p>
+      </details>
+    </div>
+  </section>
+
+  <!-- ── CTA final ── -->
+  <section class="dp-cta-band">
+    <h2>Da el salto a Discovery+ ⚡</h2>
+    <p>Únete a la comunidad que ya descubre mejor.</p>
+    <div class="dp-action" id="dpFinalAction"></div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    /* ── Página Discovery+: suscripción mensual 3,99 € con canje de moderador ── */
+    const DP_PAGE = 'discovery-plus.html';
+    const DP_ACTION_SLOTS = ['dpHeroAction', 'dpPriceAction', 'dpFinalAction'];
+
+    function dpDateEs(iso) {
+      if (!iso) return null;
+      try { return new Date(iso).toLocaleDateString('es-ES', { day: 'numeric', month: 'long', year: 'numeric' }); } catch { return null; }
+    }
+
+    function dpActionHtml(state, sub) {
+      if (state === 'active') {
+        const exp = dpDateEs(sub && sub.expires_at);
+        return `<a href="index.html" class="btn btn-primary dp-big">Ir a Explorar →</a>
+                <button type="button" class="btn btn-outline dp-cancel-btn">Cancelar suscripción</button>
+                ${exp ? `<span class="dp-active-until">⚡ Activa hasta el ${escapeHtml(exp)}</span>` : ''}`;
+      }
+      if (state === 'pending') {
+        return `<span class="dp-pending-note">⏳ Solicitud enviada — pendiente de canje por un moderador.</span>`;
+      }
+      if (state === 'inactive') {
+        return `<button type="button" class="btn btn-dp dp-big" id="dpSubscribeBtn">Suscribirme a Discovery+ · ${formatDpPrice()}</button>`;
+      }
+      return `<a href="${LOGIN_PAGE}?next=${encodeURIComponent(DP_PAGE)}" class="btn btn-dp dp-big">Crear cuenta y suscribirme ⚡</a>`;
+    }
+
+    async function renderDpActions() {
+      const slots = DP_ACTION_SLOTS
+        .map(id => document.getElementById(id))
+        .filter(Boolean);
+      const note = document.getElementById('dpMemberNote');
+      slots.forEach(s => { s.innerHTML = '<span class="dp-checking">Comprobando tu cuenta…</span>'; });
+
+      const setStatus = (k, v) => { const el = document.getElementById(k); if (el) el.textContent = v; };
+      const redeemBox = document.getElementById('dpRedeemBox');
+      const redeemCode = document.getElementById('dpRedeemCode');
+
+      let state = 'guest';
+      let sub = null;
+      try {
+        if (supabaseClient) {
+          const session = await getSession();
+          if (session) {
+            const active = await getDiscoveryPlusState(session);
+            sub = await getLatestSubscription(getSessionEmail(session));
+            state = active ? 'active' : (window.__dpPending ? 'pending' : 'inactive');
+          }
+        }
+      } catch (err) {
+        slots.forEach(s => {
+          s.innerHTML = `<span class="dp-checking">⚠️ ${escapeHtml(friendlyDbError(err))}</span>` +
+            `<br><button type="button" class="btn btn-outline dp-retry" style="margin-top:10px">Reintentar</button>`;
+          s.querySelector('.dp-retry').addEventListener('click', renderDpActions);
+        });
+        return;
+      }
+
+      // Chips de estado de la suscripción.
+      const statusEl = document.getElementById('dpChipStatus');
+      if (statusEl) {
+        if (state === 'active') statusEl.textContent = '⚡ Activa';
+        else if (state === 'pending') statusEl.textContent = '⏳ Pendiente de canje';
+        else if (state === 'inactive') statusEl.textContent = (sub && sub.status === 'cancelled') ? '⛔ Cancelada' : 'No activa';
+        else statusEl.textContent = '—';
+      }
+      const priceEl = document.getElementById('dpChipPrice');
+      if (priceEl) priceEl.textContent = state === 'active' || state === 'pending' ? formatDpPrice() : '—';
+      const expiresEl = document.getElementById('dpChipExpires');
+      if (expiresEl) expiresEl.textContent = (sub && sub.expires_at) ? dpDateEs(sub.expires_at) : '—';
+      if (redeemBox && redeemCode) {
+        if (state === 'pending' && sub && sub.redeem_code) {
+          redeemBox.hidden = false;
+          redeemCode.textContent = sub.redeem_code;
+        } else {
+          redeemBox.hidden = true;
+        }
+      }
+
+      const html = dpActionHtml(state, sub);
+      slots.forEach(s => {
+        s.innerHTML = html;
+        const btn = s.querySelector('#dpSubscribeBtn');
+        if (btn && !s._dpWired) {
+          s._dpWired = true;
+          btn.addEventListener('click', async () => {
+            slots.forEach(x => {
+              const b = x.querySelector('#dpSubscribeBtn');
+              if (b) { b.disabled = true; b.textContent = 'Enviando solicitud…'; }
+            });
+            const created = await subscribeToDiscoveryPlus();
+            if (!created) {
+              slots.forEach(x => {
+                const b = x.querySelector('#dpSubscribeBtn');
+                if (b) { b.disabled = false; b.textContent = `Suscribirme a Discovery+ · ${formatDpPrice()}`; }
+              });
+            }
+            // Si ok: subscribeToDiscoveryPlus dispara dp:changed → renderDpActions de nuevo.
+          });
+        }
+        const cancelBtn = s.querySelector('.dp-cancel-btn');
+        if (cancelBtn && !s._dpCancelWired) {
+          s._dpCancelWired = true;
+          cancelBtn.addEventListener('click', async () => {
+            slots.forEach(x => {
+              const b = x.querySelector('.dp-cancel-btn');
+              if (b) { b.disabled = true; b.textContent = 'Cancelando…'; }
+            });
+            await cancelDiscoveryPlus();
+          });
+        }
+      });
+
+      if (note) {
+        if (state === 'active') {
+          const exp = dpDateEs(sub && sub.expires_at);
+          note.textContent = `⚡ Miembro de Discovery+${exp ? ` hasta el ${exp}` : ''} — disfruta de todas las funciones.`;
+          note.hidden = false;
+        } else {
+          note.hidden = true;
+          note.textContent = '';
+        }
+      }
+    }
+
+    // Si Discovery+ cambia (ej. suscripción creada/cancelada aquí o canjeada por un mod), redibujar.
+    document.addEventListener('dp:changed', renderDpActions);
+
+    document.getElementById('dpCodeBtn').addEventListener('click', async () => {
+      if (!supabaseClient) return;
+      const session = await getSession();
+      if (!session) { window.location.replace(`${LOGIN_PAGE}?next=${encodeURIComponent(DP_PAGE)}`); return; }
+      const input = document.getElementById('dpCodeInput');
+
+      const gate = bdThrottleCheck('redeem');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+      bdThrottleRecord('redeem'); // cada intento cuenta (frena el brute-force de códigos)
+
+      const btn = document.getElementById('dpCodeBtn');
+      btn.disabled = true;
+      btn.textContent = 'Canjeando…';
+      try {
+        const { sub, extended } = await useDpCode(input.value);
+        const exp = dpDateEs(sub.expires_at);
+        showToast(extended
+          ? `Código canjeado: tu Discovery+ se amplía hasta el ${exp || ''}.`
+          : `⚡ Código canjeado: Discovery+ activo${exp ? ` hasta el ${exp}` : ''}.`, 'success', 6000);
+        input.value = '';
+      } catch (err) {
+        showToast(err.message || 'No se pudo canjear el código.', 'error', 5000);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Canjear código';
+      }
+    });
+
+    async function initPage() {
+      await requireAuth({ redirect: false });
+      await renderAuthNav();
+      if (!supabaseClient) {
+        DP_ACTION_SLOTS.forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.innerHTML = configNoticeHtml();
+        });
+      } else {
+        renderDpActions();
+      }
+    }
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

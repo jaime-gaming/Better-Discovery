@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>Login – Better Discovery</title>
+  <meta name="description" content="Inicia sesión para usar Better Discovery.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .auth-page {
+      min-height: calc(100vh - 60px);
+      display: grid;
+      place-items: center;
+      padding: 32px 20px 48px;
+    }
+
+    .auth-card {
+      width: min(100%, 460px);
+      background: linear-gradient(180deg, rgba(33,33,40,0.96) 0%, rgba(23,23,28,0.96) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .auth-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    .auth-card h1 {
+      font-size: 2rem;
+      letter-spacing: -0.03em;
+      margin-bottom: 10px;
+    }
+
+    .auth-card p {
+      color: var(--text-muted);
+      line-height: 1.6;
+      margin-bottom: 22px;
+    }
+
+    .auth-note {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-top: 16px;
+    }
+
+    .auth-switch {
+      margin-top: 10px;
+      background: transparent;
+      border: none;
+      color: var(--accent);
+      cursor: pointer;
+      font: inherit;
+      padding: 0;
+    }
+
+    .auth-actions {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .auth-status {
+      min-height: 1.2em;
+      margin-top: 12px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
+    </div>
+  </nav>
+
+  <main class="auth-page">
+    <section class="auth-card">
+      <div class="auth-kicker">🔐 Acceso privado</div>
+      <h1 id="authTitle">Inicia sesión</h1>
+      <p id="authSubtitle">Entra con tu cuenta para explorar y publicar creaciones.</p>
+
+      <form id="authForm" novalidate>
+        <div class="form-group">
+          <label class="form-label" for="email">Email</label>
+          <input id="email" class="form-input" type="email" placeholder="tu@email.com" required autocomplete="email">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="password">Contraseña</label>
+          <div class="pw-wrap">
+            <input id="password" class="form-input" type="password" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" class="pw-toggle" id="pwToggle" aria-label="Mostrar u ocultar contraseña" aria-pressed="false">👁</button>
+          </div>
+        </div>
+
+        <div class="auth-actions">
+          <button type="submit" id="submitBtn" class="btn btn-primary">Entrar</button>
+          <button type="button" id="modeToggle" class="btn btn-outline">Crear cuenta</button>
+        </div>
+
+        <div id="authStatus" class="auth-status" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="auth-note">
+        Al continuar aceptas nuestros <a href="terms.html" style="color:var(--accent)">términos y condiciones</a>
+        y la <a href="privacy.html" style="color:var(--accent)">política de privacidad</a>.
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a href="terms.html">Términos y condiciones</a>
+    <span>·</span>
+    <a href="privacy.html">Política de privacidad</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    let mode = 'login';
+
+    /* ¿A dónde volver tras el login? (requireAuth añade ?next=...) */
+    const nextTarget = getSafeNextPage(
+      new URLSearchParams(window.location.search).get('next') || ''
+    );
+
+    function setMode(nextMode) {
+      mode = nextMode;
+      const isLogin = mode === 'login';
+      document.getElementById('authTitle').textContent = isLogin ? 'Inicia sesión' : 'Crea tu cuenta';
+      document.getElementById('authSubtitle').textContent = isLogin
+        ? 'Entra con tu cuenta para explorar y publicar creaciones.'
+        : 'Crea una cuenta nueva para empezar a usar Better Discovery.';
+      document.getElementById('submitBtn').textContent = isLogin ? 'Entrar' : 'Registrarme';
+      document.getElementById('modeToggle').textContent = isLogin ? 'Crear cuenta' : 'Ya tengo cuenta';
+      document.getElementById('password').autocomplete = isLogin ? 'current-password' : 'new-password';
+    }
+
+    /* Mostrar / ocultar contraseña */
+    document.getElementById('pwToggle').addEventListener('click', () => {
+      const pw = document.getElementById('password');
+      const toggle = document.getElementById('pwToggle');
+      const show = pw.type === 'password';
+      pw.type = show ? 'text' : 'password';
+      toggle.textContent = show ? '🙈' : '👁';
+      toggle.setAttribute('aria-pressed', String(show));
+      pw.focus();
+    });
+
+    async function bootstrap() {
+      if (!IS_CONFIGURED) {
+        showToast('La app no está configurada.', 'error');
+        document.getElementById('authStatus').textContent = 'Configura Supabase en js/config.js.';
+        return;
+      }
+
+      const { data } = await supabaseClient.auth.getSession();
+      if (data?.session) {
+        window.location.replace(nextTarget);
+        return;
+      }
+
+      document.getElementById('modeToggle').addEventListener('click', () => {
+        setMode(mode === 'login' ? 'signup' : 'login');
+      });
+
+      const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+
+      document.getElementById('authForm').addEventListener('submit', async e => {
+        e.preventDefault();
+
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const status = document.getElementById('authStatus');
+        const btn = document.getElementById('submitBtn');
+
+        if (!email || !password) {
+          showToast('Completa email y contraseña.', 'error');
+          status.textContent = 'Completa email y contraseña.';
+          return;
+        }
+        if (!EMAIL_RE.test(email)) {
+          showToast('Introduce un email válido.', 'error');
+          status.textContent = 'Introduce un email válido.';
+          document.getElementById('email').focus();
+          return;
+        }
+        if (password.length < 8) {
+          showToast('La contraseña debe tener al menos 8 caracteres.', 'error');
+          status.textContent = 'La contraseña debe tener al menos 8 caracteres.';
+          document.getElementById('password').focus();
+          return;
+        }
+
+        btn.disabled = true;
+        status.textContent = mode === 'login' ? 'Iniciando sesión…' : 'Creando cuenta…';
+
+        try {
+          if (mode === 'login') {
+            // Freno anti-fuerza bruta: 5 intentos cada 15 min (dispositivo).
+            const gate = bdThrottleCheck('login');
+            if (!gate.ok) throw new Error(gate.message + ' ' + bdRetryMessage(gate.retryMs));
+            const { error } = await supabaseClient.auth.signInWithPassword({ email, password });
+            if (error) { bdThrottleRecord('login'); throw error; }
+
+            window.location.replace(nextTarget);
+            return;
+          }
+
+          const { data, error } = await supabaseClient.auth.signUp({ email, password });
+          if (error) { bdThrottleRecord('login'); throw error; }
+
+          /* Si Supabase exige confirmar el email, aún no hay sesión. */
+          if (data?.session) {
+            window.location.replace(nextTarget);
+            return;
+          }
+
+          status.textContent = `Cuenta creada. Revisa tu bandeja de entrada (${email}) para confirmar el email e iniciar sesión.`;
+          showToast('Cuenta creada. Confirma tu email para continuar.', 'success', 7000);
+          setMode('login');
+        } catch (err) {
+          const msg = /email already registered|already registered/i.test(err.message)
+            ? 'Ese email ya está registrado. ¿Olvidaste la contraseña?'
+            : /rate limit|too many/i.test(err.message)
+              ? 'Demasiados intentos. Espera unos minutos y vuelve a probar.'
+              : err.message;
+          status.textContent = msg;
+          showToast(msg, 'error', 6000);
+        } finally {
+          btn.disabled = false;
+        }
+      });
+    }
+
+    setMode('login');
+    bootstrap();
+  </script>
+</body>
+</html>

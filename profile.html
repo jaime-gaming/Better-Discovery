@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>Perfil – Better Discovery</title>
+  <meta name="description" content="Edita tu perfil, revisa tus creaciones y administra a quién sigues.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .profile-page {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 34px 24px 80px;
+    }
+
+    .profile-hero {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 18px;
+      align-items: center;
+      background: linear-gradient(180deg, rgba(33,33,40,0.95) 0%, rgba(23,23,28,0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .avatar-shell {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      background: var(--grad-1);
+      font-size: 1.9rem;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(99,102,241,0.35);
+    }
+
+    .profile-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 6px;
+    }
+
+    .profile-title h1 {
+      font-size: clamp(1.7rem, 3vw, 2.5rem);
+      line-height: 1.1;
+    }
+
+    .profile-bio {
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      max-width: 780px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      margin-bottom: 18px;
+    }
+
+    .profile-stats {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-top: 14px;
+    }
+
+    .stat {
+      background: rgba(99, 102, 241, 0.08);
+      border: 1px solid rgba(99, 102, 241, 0.25);
+      border-radius: 12px;
+      padding: 10px 16px;
+      min-width: 108px;
+      animation: fadeUp 0.4s ease both;
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .stat span {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .dp-card {
+      border-color: rgba(245, 158, 11, 0.45);
+      background:
+        linear-gradient(180deg, rgba(50, 40, 16, 0.35) 0%, rgba(23, 23, 28, 0.95) 60%),
+        linear-gradient(180deg, rgba(33, 33, 40, 0.95) 0%, rgba(23, 23, 28, 0.95) 100%);
+    }
+
+    .dp-card h2 {
+      background: linear-gradient(120deg, #f59e0b, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .dp-card .dp-mini-perks {
+      list-style: none;
+      margin: 10px 0 4px;
+      display: grid;
+      gap: 8px;
+      font-size: 0.86rem;
+      color: var(--text-muted);
+    }
+
+    .creation-delete {
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.85rem;
+      transition: color 0.15s, border-color 0.15s, background 0.15s;
+    }
+
+    .creation-delete:hover {
+      color: var(--danger);
+      border-color: var(--danger);
+      background: rgba(239, 68, 68, 0.08);
+    }
+
+    .creation-card .body {
+      position: relative;
+    }
+
+    .creation-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .profile-card {
+      background: linear-gradient(180deg, rgba(33,33,40,0.95) 0%, rgba(23,23,28,0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 20px;
+    }
+
+    .profile-card h2 {
+      font-size: 1rem;
+      margin-bottom: 12px;
+    }
+
+    .progress-track {
+      height: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 12px 0 8px;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: var(--grad-1);
+      border-radius: inherit;
+      transition: width 0.25s;
+    }
+
+    .usage-meta {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text-muted);
+      font-size: 0.85rem;
+      flex-wrap: wrap;
+    }
+
+    .profile-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+    }
+
+    .follow-input {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .follow-input .form-input {
+      flex: 1 1 240px;
+    }
+
+    .chip-list {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      font-size: 0.84rem;
+    }
+
+    .chip button {
+      background: transparent;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font: inherit;
+    }
+
+    .creations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .creation-card {
+      background: linear-gradient(180deg, rgba(30,30,40,0.95) 0%, rgba(26,26,30,0.95) 100%);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .creation-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(99, 102, 241, 0.55);
+      box-shadow: var(--shadow);
+    }
+
+    /* Enlace estirado: la tarjeta entera lleva a la vista, el botón de
+       eliminar queda por encima. */
+    .creation-link {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      border-radius: 16px;
+    }
+
+    .creation-card .body {
+      position: relative;
+      z-index: 0;
+    }
+
+    .creation-delete {
+      position: relative;
+      z-index: 2;
+    }
+
+    .creation-card .thumb {
+      height: 110px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, #312e81, #0891b2);
+      font-size: 2rem;
+    }
+
+    .creation-card .body {
+      padding: 14px;
+    }
+
+    .creation-card h3 {
+      font-size: 0.98rem;
+      margin-bottom: 6px;
+    }
+
+    .creation-card p {
+      color: var(--text-muted);
+      font-size: 0.84rem;
+      line-height: 1.5;
+      margin-bottom: 10px;
+    }
+
+    .creation-meta {
+      color: var(--text-muted);
+      font-size: 0.76rem;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .profile-note {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 840px) {
+      .profile-grid,
+      .profile-hero {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="index.html">Explorar</a>
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
+      <a href="profile.html" class="btn btn-primary">Perfil</a>
+    </div>
+    <div class="nav-auth" id="navAuth"></div>
+  </nav>
+
+  <main class="profile-page">
+    <section class="profile-hero">
+      <div class="avatar-shell" id="profileAvatar">A</div>
+      <div>
+        <div class="profile-title">
+          <h1 id="profileName">Tu perfil</h1>
+          <span class="tag-badge" id="quotaBadge">1 MB total</span>
+        </div>
+        <p class="profile-bio" id="profileBio">Edita tu nombre público y tu biografía para personalizar tu espacio.</p>
+        <div class="profile-note" id="profileIdentity"></div>
+        <div class="profile-stats" id="profileStats" hidden>
+          <div class="stat"><strong id="statCreations">0</strong><span>creaciones</span></div>
+          <div class="stat"><strong id="statLikes">0</strong><span>me gusta recibidos</span></div>
+          <div class="stat"><strong id="statComments">0</strong><span>comentarios recibidos</span></div>
+        </div>
+      </div>
+    </section>
+
+    <div id="configWarning" class="config-notice" style="display:none;margin-bottom:18px">
+      ⚙️ Supabase no está configurado. Puedes editar tu perfil localmente, pero las creaciones públicas no se cargarán.
+    </div>
+
+    <section class="profile-grid">
+      <div class="profile-card" data-reveal>
+        <h2>Editar perfil</h2>
+        <div class="form-group">
+          <label class="form-label" for="displayName">Nombre público</label>
+          <input id="displayName" class="form-input" type="text" maxlength="60" placeholder="Anónimo">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="bio">Biografía</label>
+          <textarea id="bio" class="form-textarea" maxlength="240" rows="4" placeholder="Cuéntale al mundo qué haces…"></textarea>
+        </div>
+        <div class="profile-actions">
+          <button class="btn btn-primary" id="saveProfileBtn" type="button">Guardar cambios</button>
+          <a href="upload.html" class="btn btn-outline">Subir creación</a>
+        </div>
+      </div>
+
+      <div class="profile-card" data-reveal>
+        <h2>Espacio usado</h2>
+        <div class="usage-meta">
+          <span id="usageText">0 B / 1 MB</span>
+          <span id="usagePercent">0%</span>
+        </div>
+        <div class="progress-track"><div id="usageBar" class="progress-fill" style="width:0%"></div></div>
+        <div class="usage-meta">
+          <span id="usageCount">0 creaciones guardadas</span>
+          <span id="usageRemaining">1 MB disponible</span>
+        </div>
+
+        <h2 style="margin-top:18px">Seguidos</h2>
+        <div class="follow-input">
+          <input id="followAuthor" class="form-input" type="text" maxlength="60" placeholder="Nombre de la persona a seguir">
+          <button class="btn btn-outline" id="followBtn" type="button">Seguir</button>
+        </div>
+        <div class="chip-list" id="followList"></div>
+      </div>
+
+      <div class="profile-card dp-card" id="discovery-plus" data-reveal>
+        <h2>⚡ Discovery+</h2>
+        <ul class="dp-mini-perks">
+          <li>📡 Feed «Siguiendo» en Explorar</li>
+          <li>🏷️ Filtros por categoría</li>
+          <li>⭐ Guardadas desde cualquier creación</li>
+          <li>📊 Estadísticas ampliadas de tu perfil</li>
+        </ul>
+        <p class="profile-note" id="dpStatus"></p>
+        <div class="profile-actions">
+          <button class="btn btn-dp" id="dpToggleBtn" type="button">Suscribirme a Discovery+ ⚡</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="profile-card" data-reveal>
+      <h2>Tus creaciones</h2>
+      <div id="creationsList" class="creations-grid">
+        <div class="loading" style="grid-column:1/-1"><div class="spinner"></div>Cargando…</div>
+      </div>
+    </section>
+
+    <section class="profile-card" id="bookmarksSection" style="margin-top:18px" hidden>
+      <h2>⭐ Guardadas</h2>
+      <div id="bookmarksList" class="creations-grid"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a href="terms.html">Términos y condiciones</a>
+    <span>·</span>
+    <a href="privacy.html">Política de privacidad</a>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Discovery+ amplía la cuota a 5 MB.
+    let MAX_BYTES = getMaxUploadBytes();
+    const maxQuotaLabel = () => (isDiscoveryPlusActive() ? '5 MB (Discovery+)' : '1 MB');
+    function refreshQuota() {
+      MAX_BYTES = getMaxUploadBytes();
+      const badge = document.getElementById('quotaBadge');
+      if (badge) badge.textContent = isDiscoveryPlusActive() ? '5 MB total' : '1 MB total';
+    }
+    document.addEventListener('dp:changed', refreshQuota);
+
+    const AVATAR_GRADIENTS = [
+      'linear-gradient(135deg,#7c3aed,#06b6d4)',
+      'linear-gradient(135deg,#db2777,#f59e0b)',
+      'linear-gradient(135deg,#059669,#84cc16)',
+      'linear-gradient(135deg,#2563eb,#7c3aed)',
+      'linear-gradient(135deg,#dc2626,#f59e0b)',
+      'linear-gradient(135deg,#0891b2,#7c3aed)',
+    ];
+
+    function nameHash(str) {
+      let h = 0;
+      for (const ch of String(str)) h = (h * 31 + ch.charCodeAt(0)) | 0;
+      return Math.abs(h);
+    }
+
+    async function renderProfileHeader() {
+      const profile = getProfileData();
+      const avatar = document.getElementById('profileAvatar');
+      // Sin nombre público, se muestra el email de la cuenta (coherente
+      // con la barra de navegación).
+      let fallback = DEFAULT_AUTHOR_NAME;
+      try {
+        const session = await getSession();
+        const email = getSessionEmail(session);
+        if (email) fallback = email;
+      } catch { /* sin sesión */ }
+      const profileName = profile.displayName !== DEFAULT_AUTHOR_NAME ? profile.displayName : fallback;
+
+      avatar.textContent = getProfileInitial(profileName);
+      avatar.style.background = AVATAR_GRADIENTS[nameHash(profileName) % AVATAR_GRADIENTS.length];
+      const nameEl = document.getElementById('profileName');
+      nameEl.textContent = profileName;
+      // Badge exclusivo Discovery+ junto al nombre (si eres miembro).
+      const oldBadge = nameEl.nextElementSibling;
+      if (oldBadge && oldBadge.classList && oldBadge.classList.contains('discovery-badge')) oldBadge.remove();
+      nameEl.insertAdjacentHTML('afterend', getDiscoveryPlusBadgeHtml(profileName));
+      document.getElementById('profileBio').textContent = profile.bio || 'Edita tu nombre público y tu biografía para personalizar tu espacio.';
+      document.getElementById('profileIdentity').textContent = profileName === DEFAULT_AUTHOR_NAME
+        ? 'Todavía estás usando un perfil genérico.'
+        : 'Tu perfil público se usa para firmar nuevas creaciones.';
+      document.getElementById('displayName').value = profileName;
+      document.getElementById('bio').value = profile.bio;
+    }
+
+    function renderFollowList() {
+      const list = document.getElementById('followList');
+      const authors = getFollowedAuthors();
+      if (!authors.length) {
+        list.innerHTML = '<span class="profile-note">Todavía no sigues a nadie.</span>';
+        return;
+      }
+
+      list.innerHTML = authors.map(author => `
+        <span class="chip">
+          ${escapeHtml(author)}
+          <button type="button" data-author="${escapeHtml(author)}">×</button>
+        </span>
+      `).join('');
+
+      list.querySelectorAll('button[data-author]').forEach(button => {
+        button.addEventListener('click', () => removeFollow(button.dataset.author || ''));
+      });
+    }
+
+    function updateUsage(snippets) {
+      const used = snippets.reduce((sum, snippet) => sum + snippetBytes(snippet), 0);
+      const pct = used >= MAX_BYTES ? 100 : (used / MAX_BYTES) * 100;
+      document.getElementById('usageText').textContent = `${bytesToSize(used)} / ${maxQuotaLabel()}`;
+      document.getElementById('usagePercent').textContent = `${pct.toFixed(1)}%`;
+      document.getElementById('usageBar').style.width = `${pct}%`;
+      document.getElementById('usageCount').textContent = `${snippets.length} creaciones guardadas`;
+      document.getElementById('usageRemaining').textContent = `${bytesToSize(Math.max(MAX_BYTES - used, 0))} disponible`;
+    }
+
+    function creationCardHtml(snippet, { deletable = false } = {}) {
+      const del = deletable ? `
+        <div class="creation-actions">
+          <button type="button" class="creation-delete" data-id="${escapeHtml(snippet.id)}"
+                  title="Eliminar esta creación" aria-label="Eliminar ${escapeHtml(snippet.title)}">🗑 Eliminar</button>
+        </div>` : '';
+      return `
+        <div class="creation-card">
+          <a href="view.html?id=${encodeURIComponent(snippet.id)}" class="creation-link" aria-label="Ver ${escapeHtml(snippet.title)}"></a>
+          <div class="thumb">🌐</div>
+          <div class="body">
+            <h3>${escapeHtml(snippet.title)}</h3>
+            <p>${escapeHtml(snippet.description || 'Sin descripción disponible.')}</p>
+            <div class="creation-meta">
+              <span>❤️ ${snippet.likes ?? 0}</span>
+              <span>${bytesToSize(snippetBytes(snippet))}</span>
+            </div>
+            ${del}
+          </div>
+        </div>`;
+    }
+
+    function renderCreations(snippets) {
+      const list = document.getElementById('creationsList');
+      if (!snippets.length) {
+        list.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;padding:40px 12px">
+            <div style="font-size:2.5rem;margin-bottom:12px">🖼️</div>
+            <h3>Aún no hay creaciones</h3>
+            <p>Sube tu primer HTML para que aparezca aquí.</p>
+            <a href="upload.html" class="btn btn-primary" style="margin-top:16px;display:inline-flex">+ Subir HTML</a>
+          </div>`;
+        return;
+      }
+
+      list.innerHTML = snippets.map(s => creationCardHtml(s, { deletable: true })).join('');
+      list.querySelectorAll('.creation-delete').forEach(btn => {
+        btn.addEventListener('click', () => deleteCreation(btn.dataset.id));
+      });
+    }
+
+    /* ── Descarga / eliminación de una creación propia ── */
+    async function deleteCreation(id) {
+      if (!supabaseClient) { showToast('Supabase no está configurado.', 'error'); return; }
+      if (!window.confirm('¿Eliminar esta creación? Esta acción no se puede deshacer.')) return;
+      const { error } = await supabaseClient.from('snippets').delete().eq('id', id);
+      if (error) { showToast(friendlyDbError(error), 'error', 5000); return; }
+      void logEvent('upload.deleted', { id });
+      const ids = getOwnedSnippetIds().filter(x => x !== id);
+      writeJsonStorage(OWNED_SNIPPETS_STORAGE_KEY, ids);
+      showToast('Creación eliminada.', 'success');
+      await loadCreations();
+    }
+
+    async function loadCreations() {
+      if (!supabaseClient) {
+        document.getElementById('creationsList').innerHTML = configNoticeHtml();
+        updateUsage([]);
+        return;
+      }
+
+      const ownedIds = getOwnedSnippetIds().slice(0, 500);
+      const profile = getProfileData();
+      const myName = profile.displayName;
+      const hasName = myName && myName !== DEFAULT_AUTHOR_NAME;
+
+      showLoadBar();
+      try {
+        const SELECT = 'id, title, description, author, created_at, likes, html_content';
+        const byId = ownedIds.length
+          ? supabaseClient.from('snippets').select(SELECT).in('id', ownedIds)
+          : Promise.resolve({ data: [], error: null });
+        // Las creaciones hechas con este nombre desde otro dispositivo
+        // también son tuyas, aunque no estén en la lista local.
+        const byName = hasName
+          ? supabaseClient.from('snippets').select(SELECT).eq('author', myName)
+          : Promise.resolve({ data: [], error: null });
+
+        const [r1, r2] = await Promise.all([byId, byName]);
+        if (r1.error) throw r1.error;
+        if (r2.error) throw r2.error;
+
+        const merged = new Map();
+        for (const s of [...(r1.data || []), ...(r2.data || [])]) {
+          if (s && s.id) merged.set(s.id, s);
+        }
+        const snippets = [...merged.values()].sort(
+          (a, b) => new Date(b.created_at) - new Date(a.created_at)
+        );
+
+        hideLoadBar();
+        updateUsage(snippets);
+        renderCreations(snippets);
+        lastCreations = snippets;
+        loadStats(snippets);
+        renderBookmarks();
+      } catch (err) {
+        hideLoadBar();
+        document.getElementById('creationsList').innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;padding:40px 12px">
+            <div style="font-size:2.5rem;margin-bottom:12px">⚠️</div>
+            <h3>No se pudieron cargar tus creaciones</h3>
+            <p style="max-width:420px;margin:0 auto">${escapeHtml(friendlyDbError(err))}</p>
+          </div>`;
+        updateUsage([]);
+      }
+    }
+
+    /* ── Estadísticas ampliadas (Discovery+) ── */
+    let lastCreations = [];
+
+    /* Cuenta animada: de 0 al valor final en ~500 ms (respeta reduced-motion). */
+    function animateCount(el, target) {
+      const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      if (reduced || !el) { if (el) el.textContent = target; return; }
+      const start = performance.now();
+      const dur = 500;
+      function tick(now) {
+        const t = Math.min(1, (now - start) / dur);
+        const eased = 1 - Math.pow(1 - t, 3); // easeOutCubic
+        el.textContent = Math.round(eased * target);
+        if (t < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+
+    async function loadStats(snippets) {
+      const statsEl = document.getElementById('profileStats');
+      if (!isDiscoveryPlusActive()) { statsEl.hidden = true; return; }
+      if (!supabaseClient) return;
+
+      const ids = snippets.map(s => s.id);
+      const likes = snippets.reduce((sum, s) => sum + (Number(s.likes) || 0), 0);
+      let comments = 0;
+      if (ids.length) {
+        const { data, error } = await supabaseClient
+          .from('comments')
+          .select('id')
+          .in('snippet_id', ids);
+        if (!error && data) comments = data.length;
+      }
+      statsEl.hidden = false;
+      animateCount(document.getElementById('statCreations'), snippets.length);
+      animateCount(document.getElementById('statLikes'), likes);
+      animateCount(document.getElementById('statComments'), comments);
+    }
+
+    /* ── Guardadas (Discovery+) ── */
+    async function renderBookmarks() {
+      const section = document.getElementById('bookmarksSection');
+      if (!isDiscoveryPlusActive()) { section.hidden = true; return; }
+      const ids = getBookmarkedIds();
+      if (!ids.length || !supabaseClient) {
+        section.hidden = true;
+        return;
+      }
+      section.hidden = false;
+      const list = document.getElementById('bookmarksList');
+      list.innerHTML = '<div class="loading" style="grid-column:1/-1"><div class="spinner"></div>Cargando…</div>';
+      try {
+        const { data, error } = await supabaseClient
+          .from('snippets')
+          .select('id, title, description, author, created_at, likes, html_content')
+          .in('id', ids.slice(0, 200));
+        if (error) throw error;
+        const byId = new Map((data || []).map(s => [String(s.id), s]));
+        const ordered = ids.map(id => byId.get(id)).filter(Boolean);
+        list.innerHTML = ordered.length
+          ? ordered.map(s => creationCardHtml(s)).join('')
+          : '<div class="profile-note">Todavía no has guardado nada. Pulsa «⭐ Guardar» en cualquier creación.</div>';
+      } catch (err) {
+        list.innerHTML = `<div class="profile-note">⚠️ ${escapeHtml(friendlyDbError(err))}</div>`;
+      }
+    }
+
+    /* ── Tarjeta Discovery+ ── */
+    function renderDiscoveryPlusCard() {
+      const statusEl = document.getElementById('dpStatus');
+      const btn = document.getElementById('dpToggleBtn');
+      if (!statusEl || !btn) return;
+
+      if (isDiscoveryPlusActive()) {
+        statusEl.textContent = 'Activo — disfruta del feed «Siguiendo», los filtros, las Guardadas y tus estadísticas.';
+        btn.textContent = 'Ver feed 📡';
+        btn.onclick = () => { window.location.replace('index.html'); };
+        return;
+      }
+      statusEl.textContent = 'Desbloquea funciones de descubrimiento mejoradas para tu cuenta.';
+      btn.textContent = `Suscribirme a Discovery+ · ${formatDpPrice()}`;
+      btn.onclick = () => openDiscoveryPlusModal();
+    }
+
+    async function saveProfile() {
+      const displayName = document.getElementById('displayName').value.trim() || DEFAULT_AUTHOR_NAME;
+      const bio = document.getElementById('bio').value.trim();
+      saveProfileData({ displayName, bio });
+      await renderProfileHeader();
+      await renderAuthNav();
+      await loadCreations();
+      showToast('Perfil guardado.', 'success');
+    }
+
+    function addFollow() {
+      const input = document.getElementById('followAuthor');
+      const author = input.value.trim();
+      if (!author) {
+        showToast('Escribe un nombre para seguir.', 'error');
+        return;
+      }
+      const { nowFollowing } = toggleFollowAuthor(author);
+      input.value = '';
+      renderFollowList();
+      showToast(nowFollowing ? 'Autor seguido.' : 'Autor dejado de seguir.', 'success');
+    }
+
+    function removeFollow(author) {
+      const { nowFollowing } = toggleFollowAuthor(author);
+      renderFollowList();
+      showToast(nowFollowing ? 'Autor seguido.' : 'Autor dejado de seguir.', 'success');
+    }
+
+    document.addEventListener('dp:changed', () => {
+      renderDiscoveryPlusCard();
+      loadStats(lastCreations);
+      renderBookmarks();
+      refreshQuota();
+    });
+
+    async function initPage() {
+      await requireAuth({ redirect: false });
+      await renderAuthNav();
+      if (!IS_CONFIGURED) document.getElementById('configWarning').style.display = 'block';
+
+      refreshQuota();
+      await renderProfileHeader();
+      renderFollowList();
+      renderDiscoveryPlusCard();
+      await loadCreations();
+
+      if (window.location.hash === '#discovery-plus') {
+        document.getElementById('discovery-plus')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+
+      document.getElementById('saveProfileBtn').addEventListener('click', saveProfile);
+      document.getElementById('followBtn').addEventListener('click', addFollow);
+      document.getElementById('followAuthor').addEventListener('keydown', e => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addFollow();
+        }
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

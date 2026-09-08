@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0d0d0d">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='0.9em' font-size='90'%3E%F0%9F%9A%80%3C/text%3E%3C/svg%3E">
+  <title>Subir – Better Discovery</title>
+  <meta name="description" content="Comparte tu creación HTML con el mundo. Sube hasta 1 MB de código HTML.">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .preview-toggle {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .preview-toggle button {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      padding: 4px 12px;
+      font-size: 0.82rem;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .preview-toggle button:hover { border-color: var(--accent); color: var(--accent); }
+
+    #livePreview {
+      width: 100%;
+      height: 340px;
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      background: #fff;
+      display: none;
+    }
+
+    .progress-bar-wrap {
+      height: 4px;
+      background: var(--border);
+      border-radius: 4px;
+      margin-top: 6px;
+      overflow: hidden;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+
+    .upload-success {
+      text-align: center;
+      padding: 60px 24px;
+    }
+
+    .upload-success .check {
+      font-size: 4rem;
+      margin-bottom: 16px;
+    }
+
+    .upload-success h2 { font-size: 1.6rem; margin-bottom: 10px; }
+    .upload-success p  { color: var(--text-muted); margin-bottom: 24px; }
+  </style>
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav>
+    <a href="index.html" class="nav-logo">🚀 Better Discovery</a>
+    <div class="nav-links">
+      <a href="index.html">Explorar</a>
+      <a href="about.html">Acerca de</a>
+      <a href="discovery-plus.html">⚡ Discovery+</a>
+      <a href="support.html">Soporte</a>
+      <a href="upload.html" class="btn btn-primary active">+ Subir</a>
+    </div>
+    <div class="nav-auth" id="navAuth"></div>
+  </nav>
+
+  <!-- Form -->
+  <div class="form-page" id="formPage">
+    <div class="page-header">
+      <h1 class="page-title">Sube tu creación HTML</h1>
+      <p class="page-sub" id="limitPageSub">Pega tu código HTML (hasta 1 MB). Otras personas podrán verlo e interactuar con él.</p>
+    </div>
+
+    <div id="configWarning" class="config-notice" style="display:none;margin-bottom:24px">
+      ⚙️ Supabase aún no está configurado. Abre <code>js/config.js</code> y completa las líneas de URL y clave anon (11 y 12).
+      Consulta la página <a href="about.html" style="color:var(--accent)">Acerca de / Configuración</a>.
+    </div>
+
+    <div class="panel" style="margin-bottom:24px">
+      <div class="panel-label">Perfil rápido</div>
+      <p style="color:var(--text-muted);margin-bottom:12px">Tu nombre público se usa para firmar las creaciones y aparecer en tu perfil.</p>
+      <input id="quickProfileName" class="form-input" type="text" maxlength="60" placeholder="Nombre público">
+    </div>
+
+    <form id="uploadForm" novalidate>
+
+      <!-- Title -->
+      <div class="form-group">
+        <label class="form-label" for="title">
+          Título <span class="hint">obligatorio</span>
+        </label>
+        <input id="title" class="form-input" type="text" maxlength="120"
+               placeholder="Mi increíble proyecto HTML" required>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label" for="description">Descripción</label>
+        <textarea id="description" class="form-textarea" maxlength="500" rows="3"
+                  placeholder="¿Qué hace tu creación? ¿Con qué pueden interactuar los visitantes?"></textarea>
+      </div>
+
+      <!-- Author + optional tag -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="author">Tu nombre / usuario</label>
+          <input id="author" class="form-input" type="text" maxlength="60" placeholder="Anónimo">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="tag">Categoría <span class="hint">opcional</span></label>
+          <select id="tag" class="form-input">
+            <option value="">— ninguna —</option>
+            <option value="game">🎮 Juego</option>
+            <option value="art">🎨 Arte / Animación</option>
+            <option value="tool">🛠️ Herramienta / Utilidad</option>
+            <option value="demo">📐 Demo / Experimento</option>
+            <option value="interactive">🖱️ Interactivo</option>
+            <option value="other">📦 Otro</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- HTML code -->
+      <div class="form-group">
+        <div class="preview-toggle">
+          <label class="form-label" for="htmlCode" style="margin:0;flex:1">
+            Código HTML <span class="hint" id="limitHint">obligatorio · máximo 1 MB</span>
+          </label>
+          <button type="button" id="togglePreview">👁 Vista previa</button>
+        </div>
+
+        <div style="margin-bottom:10px">
+          <label class="form-label" for="htmlFile">Cargar archivo .html <span class="hint">o arrástralo al editor</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <input id="htmlFile" class="form-input" type="file" accept=".html,.htm,text/html" style="flex:1;min-width:200px">
+            <button type="button" id="loadSampleBtn" class="btn btn-outline">💡 Probar un ejemplo</button>
+          </div>
+          <div class="size-bar" style="justify-content:flex-start;margin-top:6px">Se rechazan archivos ZIP o cualquier formato que no sea HTML.</div>
+        </div>
+
+        <textarea id="htmlCode" class="form-textarea code-textarea" spellcheck="false"
+                  placeholder="<!DOCTYPE html>&#10;<html>&#10;  <head><title>Mi creación</title></head>&#10;  <body>&#10;    <h1>¡Hola mundo!</h1>&#10;  </body>&#10;</html>"></textarea>
+
+        <div class="progress-bar-wrap">
+          <div class="progress-bar" id="sizeBar" style="width:0%"></div>
+        </div>
+        <div class="size-bar" id="sizeLabel">0 B / 1 MB</div>
+
+        <!-- Sandbox: allow-scripts without allow-same-origin keeps the preview in a null
+             origin, preventing any access to the parent page's DOM/cookies/localStorage. -->
+        <iframe id="livePreview"
+                sandbox="allow-scripts allow-forms allow-modals allow-popups"
+                title="Vista previa en vivo"></iframe>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="submitBtn">🚀 Publicar</button>
+        <a href="index.html" class="btn btn-outline">Cancelar</a>
+        <span id="submitStatus" style="font-size:0.85rem;color:var(--text-muted);margin-left:auto"></span>
+      </div>
+
+    </form>
+  </div>
+
+  <!-- Success state (hidden initially) -->
+  <div id="successPage" class="form-page" style="display:none">
+    <div class="upload-success">
+      <div class="check">🎉</div>
+      <h2>¡Publicado!</h2>
+      <p>Tu creación ya está en línea y lista para ser descubierta.</p>
+      <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+        <a id="viewLink" href="#" class="btn btn-primary">Ver mi creación →</a>
+        <a href="upload.html" class="btn btn-outline">Subir otra</a>
+        <a href="index.html" class="btn btn-outline">Explorar todo</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="site-footer">
+    <a href="terms.html">Términos y condiciones</a>
+    <span>·</span>
+    <a href="privacy.html">Política de privacidad</a>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.4/dist/umd/supabase.js" integrity="sha384-ysv13JVP3fufiEXfjML9OdCa/rRbMJvUBOWyor82wfuK8INNZAvmbxHgKIHi+oqz" crossorigin="anonymous"></script>
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    // Discovery+ sube hasta 5 MB por creación; el resto, 1 MB.
+    let MAX_BYTES = getMaxUploadBytes();
+    const maxLimitText = () => (isDiscoveryPlusActive() ? '5 MB (Discovery+)' : '1 MB');
+    let previewVisible = false;
+    let previewTimer = null;
+
+    function updateUploadLimits() {
+      MAX_BYTES = getMaxUploadBytes();
+      document.getElementById('limitPageSub').textContent =
+        `Pega tu código HTML (hasta ${maxLimitText()}). Otras personas podrán verlo e interactuar con él.`;
+      document.getElementById('limitHint').textContent =
+        `obligatorio · máximo ${maxLimitText()}`;
+      updateSizeIndicator();
+    }
+    document.addEventListener('dp:changed', updateUploadLimits);
+
+    /* La vista previa se actualiza con un pequeño retardo para no
+       re-renderizar el iframe en cada pulsación de tecla. */
+    function schedulePreviewRefresh() {
+      if (!previewVisible) return;
+      clearTimeout(previewTimer);
+      previewTimer = setTimeout(refreshPreview, 450);
+    }
+
+    function getHtmlInputValue() {
+      return document.getElementById('htmlCode').value;
+    }
+
+    function validateHtmlDocument(code) {
+      const value = String(code || '').trim();
+      if (!value) return 'El código HTML no puede estar vacío.';
+      if (!/<html[\s>]/i.test(value)) return 'Solo se aceptan documentos HTML completos.';
+      if (!/<body[\s>]/i.test(value)) return 'El HTML debe incluir un cuerpo <body>.';
+      return null;
+    }
+
+    function isAllowedHtmlFile(file) {
+      const name = String(file?.name || '').toLowerCase();
+      const type = String(file?.type || '').toLowerCase();
+      return (name.endsWith('.html') || name.endsWith('.htm')) || type === 'text/html';
+    }
+
+    /* ── Show config warning ── */
+    if (!IS_CONFIGURED) {
+      document.getElementById('configWarning').style.display = 'block';
+      document.getElementById('submitBtn').disabled = true;
+    }
+
+    /* ── Size indicator ── */
+    function updateSizeIndicator() {
+      const code  = document.getElementById('htmlCode').value;
+      const bytes = new TextEncoder().encode(code).length;
+      const pct   = (bytes / MAX_BYTES) * 100;
+
+      const bar   = document.getElementById('sizeBar');
+      const label = document.getElementById('sizeLabel');
+
+      bar.style.width = Math.min(pct, 100) + '%';
+
+      if (bytes > MAX_BYTES) {
+        bar.style.background    = 'var(--danger)';
+        label.className         = 'size-bar error';
+        label.textContent       = `${bytesToSize(bytes)} / ${maxLimitText()} — ¡supera el límite!`;
+      } else if (pct > 80) {
+        bar.style.background    = '#f59e0b';
+        label.className         = 'size-bar warn';
+        label.textContent       = `${bytesToSize(bytes)} / ${maxLimitText()}`;
+      } else {
+        bar.style.background    = 'var(--accent)';
+        label.className         = 'size-bar';
+        label.textContent       = `${bytesToSize(bytes)} / ${maxLimitText()}`;
+      }
+    }
+
+    document.getElementById('htmlCode').addEventListener('input', () => {
+      updateSizeIndicator();
+      schedulePreviewRefresh();
+    });
+
+    document.getElementById('htmlFile').addEventListener('change', async e => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      if (!isAllowedHtmlFile(file)) {
+        showToast('Solo se permiten archivos HTML. ZIP y otros formatos están rechazados.', 'error');
+        e.target.value = '';
+        return;
+      }
+
+      if (file.size > MAX_BYTES) {
+        showToast(`El archivo pesa ${bytesToSize(file.size)} y supera el límite de ${maxLimitText()}.`, 'error');
+        e.target.value = '';
+        return;
+      }
+
+      const text = await file.text();
+      const validationError = validateHtmlDocument(text);
+      if (validationError) {
+        showToast(validationError, 'error');
+        e.target.value = '';
+        return;
+      }
+
+      document.getElementById('htmlCode').value = text;
+      updateSizeIndicator();
+      refreshPreviewNow();
+      showToast('Archivo HTML cargado correctamente.', 'success');
+    });
+
+    /* ── Live preview toggle ── */
+    const previewIframe = document.getElementById('livePreview');
+
+    function refreshPreviewNow() {
+      clearTimeout(previewTimer);
+      if (!previewVisible) return;
+      const code = document.getElementById('htmlCode').value;
+      previewIframe.srcdoc = code || '<p style="color:#888;font-family:sans-serif;padding:20px">Tu HTML aparecerá aquí…</p>';
+    }
+
+    const refreshPreview = refreshPreviewNow;
+
+    document.getElementById('togglePreview').addEventListener('click', () => {
+      previewVisible = !previewVisible;
+      previewIframe.style.display = previewVisible ? 'block' : 'none';
+      document.getElementById('togglePreview').textContent = previewVisible ? '✏️ Editor' : '👁 Vista previa';
+      if (previewVisible) refreshPreviewNow();
+    });
+
+    /* ── Sample ── */
+    const SAMPLE_HTML = `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Mi primer juego</title>
+  <style>
+    body { margin:0; background:#0f172a; color:#e2e8f0; font-family:sans-serif;
+           display:flex; flex-direction:column; align-items:center; justify-content:center;
+           height:100vh; gap:12px; }
+    canvas { border-radius:12px; box-shadow:0 10px 40px rgba(0,0,0,.5); }
+    button { padding:8px 18px; border-radius:8px; border:none; cursor:pointer;
+             background:#6366f1; color:white; font-size:14px; }
+    p { margin:0; opacity:.7; font-size:13px; }
+  </style>
+</head>
+<body>
+  <h2>⭐ Estrellitas</h2>
+  <p>Mueve el ratón · haz clic para explotar</p>
+  <canvas id="c" width="420" height="260"></canvas>
+  <button onclick="explode()">✨ Explotar</button>
+  <script>
+    const cv = document.getElementById('c'), ctx = cv.getContext('2d');
+    let stars = Array.from({length: 60}, () => ({
+      x: Math.random()*cv.width, y: Math.random()*cv.height,
+      r: Math.random()*2+1, s: Math.random()*.5+.2,
+      hue: Math.random()*360
+    }));
+    function explode(cx, cy) {
+      for (let i = 0; i < 40; i++) stars.push({
+        x: cx ?? Math.random()*cv.width, y: cy ?? Math.random()*cv.height,
+        r: Math.random()*2+1, s: Math.random()*.5+.2,
+        hue: Math.random()*360, vx: (Math.random()-.5)*6, vy: (Math.random()-.5)*6, life: 60
+      });
+    }
+    cv.addEventListener('click', e => {
+      const rect = cv.getBoundingClientRect();
+      explode((e.clientX-rect.left)*cv.width/rect.width, (e.clientY-rect.top)*cv.height/rect.height);
+    });
+    (function tick() {
+      ctx.clearRect(0,0,cv.width,cv.height);
+      stars = stars.filter(st => st.life !== undefined ? (st.life-- > 0) : true);
+      for (const st of stars) {
+        ctx.fillStyle = 'hsl(' + st.hue + ',90%,65%)';
+        ctx.beginPath(); ctx.arc(st.x, st.y, st.r, 0, 7); ctx.fill();
+        st.x += st.vx ?? 0; st.y += (st.vy ?? st.s);
+        if (st.x < 0) st.x = cv.width; if (st.x > cv.width) st.x = 0;
+        if (st.y > cv.height) st.y = 0;
+        if (st.vx !== undefined) st.hue = (st.hue + 4) % 360;
+      }
+      requestAnimationFrame(tick);
+    })();
+  <\/script>
+</body>
+</html>`;
+
+    document.getElementById('loadSampleBtn').addEventListener('click', () => {
+      document.getElementById('htmlCode').value = SAMPLE_HTML;
+      updateSizeIndicator();
+      refreshPreviewNow();
+      showToast('Ejemplo cargado en el editor.', 'success');
+    });
+
+    /* ── Drag & drop ── */
+    const codeArea = document.getElementById('htmlCode');
+    ['dragenter', 'dragover'].forEach(ev => codeArea.addEventListener(ev, e => {
+      e.preventDefault();
+      codeArea.classList.add('dragover');
+    }));
+    ['dragleave', 'drop'].forEach(ev => codeArea.addEventListener(ev, e => {
+      e.preventDefault();
+      codeArea.classList.remove('dragover');
+    }));
+    codeArea.addEventListener('drop', async e => {
+      const file = e.dataTransfer?.files?.[0];
+      if (!file) return;
+      if (!isAllowedHtmlFile(file)) {
+        showToast('Solo se permiten archivos HTML. ZIP y otros formatos están rechazados.', 'error');
+        return;
+      }
+      if (file.size > MAX_BYTES) {
+        showToast(`El archivo pesa ${bytesToSize(file.size)} y supera el límite de ${maxLimitText()}.`, 'error');
+        return;
+      }
+      const text = await file.text();
+      const validationError = validateHtmlDocument(text);
+      if (validationError) { showToast(validationError, 'error'); return; }
+      codeArea.value = text;
+      updateSizeIndicator();
+      refreshPreviewNow();
+      showToast('Archivo HTML cargado correctamente.', 'success');
+    });
+
+    /* ── Form submit ── */
+    document.getElementById('uploadForm').addEventListener('submit', async e => {
+      e.preventDefault();
+
+      if (!IS_CONFIGURED) {
+        showToast('Configura primero las credenciales de Supabase.', 'error');
+        return;
+      }
+
+      const title    = document.getElementById('title').value.trim();
+      const desc     = document.getElementById('description').value.trim();
+      const profileName = document.getElementById('quickProfileName').value.trim() || getProfileData().displayName;
+      const author   = document.getElementById('author').value.trim() || profileName || DEFAULT_AUTHOR_NAME;
+      const tag      = document.getElementById('tag').value;
+      const htmlCode = getHtmlInputValue();
+
+      /* Validation */
+      if (!title) { showToast('Añade un título.', 'error'); document.getElementById('title').focus(); return; }
+      const validationError = validateHtmlDocument(htmlCode);
+      if (validationError) { showToast(validationError, 'error'); document.getElementById('htmlCode').focus(); return; }
+
+      const bytes = new TextEncoder().encode(htmlCode).length;
+      if (bytes > MAX_BYTES) { showToast(`El HTML supera el límite de ${maxLimitText()}.`, 'error'); return; }
+
+      const gate = bdThrottleCheck('upload');
+      if (!gate.ok) {
+        showToast(gate.message + ' ' + bdRetryMessage(gate.retryMs), 'error', 6000);
+        return;
+      }
+
+      saveProfileData({ displayName: profileName, bio: getProfileData().bio });
+
+      /* Submit */
+      const btn    = document.getElementById('submitBtn');
+      const status = document.getElementById('submitStatus');
+      btn.disabled     = true;
+      btn.textContent  = '⏳ Publicando…';
+      status.textContent = '';
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('snippets')
+          .insert([{ title, description: desc, author, tag: tag || null, html_content: htmlCode }])
+          .select('id')
+          .single();
+
+        if (error) throw error;
+        bdThrottleRecord('upload');
+
+        /* Show success */
+        recordOwnedSnippetId(data.id);
+        void logEvent('upload.created', { id: data.id, title });
+        document.getElementById('formPage').style.display    = 'none';
+        document.getElementById('successPage').style.display = 'block';
+        document.getElementById('viewLink').href = `view.html?id=${encodeURIComponent(data.id)}`;
+
+      } catch (err) {
+        showToast(friendlyDbError(err), 'error', 6000);
+        btn.disabled    = false;
+        btn.textContent = '🚀 Publicar';
+        status.textContent = '';
+      }
+    });
+
+    async function initPage() {
+      // Subir requiere cuenta: las creaciones se firman con tu perfil.
+      await requireAuth({ redirect: true });
+      await renderAuthNav();
+      updateUploadLimits();
+      const profile = getProfileData();
+      document.getElementById('quickProfileName').value = profile.displayName === DEFAULT_AUTHOR_NAME ? '' : profile.displayName;
+      document.getElementById('author').placeholder = profile.displayName;
+    }
+
+    document.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>
